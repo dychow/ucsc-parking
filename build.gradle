@@ -1,0 +1,63 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.0.1'
+        
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+        classpath 'com.google.gms:google-services:3.2.0' // google-services plugin
+
+    }
+
+    ext {
+
+        // modify the apiKey and clientPrefix
+
+        apiKey = "AIzaSyDeZ99eomZaoy-iPM9PnzRtVhykS3WHeIU"
+
+        clientPrefix = "1016789262996-34faigjrtc8bus99ecsof4dtj8nte827"
+
+        // google identity service
+
+        discoveryEndpoint = "https://accounts.google.com/.well-known/openid-configuration"
+
+        authorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth"
+        tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token"
+        userInfoEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
+
+        // google identity client
+
+        clientId = "${clientPrefix}.apps.googleusercontent.com"
+        redirectScheme = "com.googleusercontent.apps.${clientPrefix}"
+        redirectUri = "com.googleusercontent.apps.${clientPrefix}:/oauth2redirect"
+
+        authorizationScope = "openid email profile https://www.googleapis.com/auth/books"
+
+        // client keystore
+
+        secret = "secret"
+
+        keystore = "${secret}.keystore"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url "https://maven.google.com" // Google's Maven repository
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

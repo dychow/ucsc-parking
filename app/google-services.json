@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1016789262996",
+    "firebase_url": "https://cmpe-123a-18-g11.firebaseio.com",
+    "project_id": "cmpe-123a-18-g11",
+    "storage_bucket": "cmpe-123a-18-g11.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1016789262996:android:cd35e4e054acba7f",
+        "android_client_info": {
+          "package_name": "com.example.daniel.ucscparking"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1016789262996-e94gp1h2thpe1253spllsci7o0fd1bp4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeZ99eomZaoy-iPM9PnzRtVhykS3WHeIU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

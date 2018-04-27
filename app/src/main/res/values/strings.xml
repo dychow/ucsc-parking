@@ -1,0 +1,63 @@
+<resources>
+    <string name="app_name">UCSCParking</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="available_spots">Available Spots</string>
+
+    <string name="title_home">Home</string>
+    <string name="title_map">Map</string>
+    <string name="title_spots">Parking Spots</string>
+    <string name="title_profile">Profile</string>
+    <string name="set_filter">Set Filter</string>
+    <string name="profile">Profile</string>
+    <string name="current_status">Current Parking Status</string>
+    <string name="logout">Log Out</string>
+    <string name="refresh">Refresh</string>
+    <string name="title_activity_login">Sign in</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="password_creation">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_register">Register</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="authorization_failed">Authorization failed to complete</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."</string>
+    <string name="title_activity_register">Register</string>
+    <string name="action_sign_in_short">Sign in</string>
+
+    <!-- Strings related to profile -->
+    <string name="edit_profile">Edit Profile</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="cancel_changes">Cancel Changes</string>
+
+    <!-- Strings related to filtering -->
+    <string name="dialog_title">Filters</string>
+    <string name="dialog_message">Select which items to display</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+
+    <!-- String related to parking list -->
+    <string-array name="ParkingSpots">
+        <item>East Remote</item>
+        <item>West Remote</item>
+        <item>West Core</item>
+        <item>Cowell</item>
+        <item>Stevenson</item>
+        <item>Crown</item>
+        <item>Merill</item>
+        <item>Kresge</item>
+        <item>Porter</item>
+        <item>Oakes</item>
+        <item>Rachel Carson</item>
+        <item>College 9</item>
+        <item>College 10</item>
+    </string-array>
+
+</resources>
