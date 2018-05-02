@@ -98,7 +98,6 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
     private BeaconManager mBeaconManager;
     private BackgroundPowerSaver backgroundPowerSaver;
 
-    private BluetoothDialog bluetoothDialog;
     private ArrayAdapter<String> arrayAdapter;
     private ArrayList<String> bluetoothArray;
 
@@ -398,9 +397,6 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
 
             /******** Enable Bluetooth Beacon Communication  ********/
 
-//            bluetoothDialog = new BluetoothDialog();
-//            bluetoothArray = bluetoothDialog.getBluetoothArray();
-//            arrayAdapter = bluetoothDialog.getArrayAdapter();
             bluetoothArray = new ArrayList<String>();
             arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, bluetoothArray);
 
