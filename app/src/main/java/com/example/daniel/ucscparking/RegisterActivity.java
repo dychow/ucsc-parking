@@ -153,7 +153,6 @@ public class RegisterActivity extends AppCompatActivity {
 //                jsonObj.put("first name", params[0].acc_firstName);
 //                jsonObj.put("last name", params[0].acc_lastName);
 //                jsonObj.put("user email", params[0].acc_loginId);
-////                jsonObj.put("permitid", params[0].acc_permitId);
 //                jsonObj.put("user pwd", params[0].acc_password);
 //
 //                System.out.println("Making JSON Object request");

@@ -81,6 +81,9 @@
         <activity
             android:name=".ProfileActivity"
             android:label="@string/title_profile" />
+        <activity
+            android:name=".StatusActivity"
+            android:label="@string/title_status" />
     </application>
 
 </manifest>

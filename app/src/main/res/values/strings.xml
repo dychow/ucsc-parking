@@ -9,10 +9,12 @@
     <string name="title_profile">Profile</string>
     <string name="set_filter">Set Filter</string>
     <string name="profile">Profile</string>
-    <string name="current_status">Current Parking Status</string>
+    <string name="parking_status">Parking Status</string>
     <string name="logout">Log Out</string>
     <string name="refresh">Refresh</string>
     <string name="title_activity_login">Sign in</string>
+    <string name="title_status">Current Status</string>
+    <string name="title_free_spots">Free Spots</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -42,6 +44,20 @@
     <string name="dialog_message">Select which items to display</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
+
+    <!-- Strings related to current status -->
+    <string name="parked_status">You are currently parked in </string>
+    <string name="not_parked_status">You are currently not parked</string>
+    <string name="time_remaining">Time Remaining: </string>
+    <string name="valid_parking">Valid</string>
+    <string name="invalid_parking">Invalid</string>
+    <string name="scan_spots">Verify Parking</string>
+
+    <!-- Strings related to bluetooth -->
+    <string name="nearby_spots">Nearby Spots</string>
+    <string name="claim_spot">Claim Spot</string>
+
+
 
     <!-- String related to parking list -->
     <string-array name="ParkingSpots">
