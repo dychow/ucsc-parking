@@ -58,22 +58,22 @@
     <string name="claim_spot">Claim Spot</string>
 
 
-
     <!-- String related to parking list -->
-    <string-array name="ParkingSpots">
-        <item>East Remote</item>
-        <item>West Remote</item>
-        <item>West Core</item>
-        <item>Cowell</item>
-        <item>Stevenson</item>
-        <item>Crown</item>
-        <item>Merill</item>
-        <item>Kresge</item>
-        <item>Porter</item>
-        <item>Oakes</item>
-        <item>Rachel Carson</item>
-        <item>College 9</item>
-        <item>College 10</item>
-    </string-array>
+    <string name="east_remote">East Remote</string>
+    <string name="west_remote">West Remote</string>
+    <string name="west_core">West Core</string>
+    <string name="cowell">Cowell</string>
+    <string name="stevenson">Stevenson</string>
+    <string name="crown">Crown</string>
+    <string name="merill">Merill</string>
+    <string name="kresge">Kresge</string>
+    <string name="porter">Porter</string>
+    <string name="oakes">Oakes</string>
+    <string name="rc">Rachel Carson</string>
+    <string name="c9">College Nine</string>
+    <string name="c10">College Ten</string>
+    <string name="hahn">Hahn Student Services</string>
+    <string name="baskin">Jack Baskin Engineering</string>
+    <string name="opers">OPERS</string>
 
 </resources>

@@ -71,10 +71,42 @@ public class LoginActivity extends AppCompatActivity{
     private View mProgressView;
     private View mLoginFormView;
 
+
+    String name;
+    String email;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        getSupportActionBar().setTitle(R.string.title_activity_login);
+
+        mAuth = FirebaseAuth.getInstance();
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            // Name, email address, and profile photo Url
+            name = user.getDisplayName();
+            email = user.getEmail();
+
+            // Check if user's email is verified
+            boolean emailVerified = user.isEmailVerified();
+
+            // The user's ID, unique to the Firebase project. Do NOT use this value to
+            // authenticate with your backend server, if you have one. Use
+            // FirebaseUser.getToken() instead.
+            String uid = user.getUid();
+
+            System.out.println(name);
+            System.out.println(email);
+            System.out.println(emailVerified);
+            System.out.println(uid);
+
+            Intent loggedIntent = new Intent(this, HomeActivity.class);
+            loggedIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(loggedIntent);
+            finish();
+        }
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -113,8 +145,6 @@ public class LoginActivity extends AppCompatActivity{
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-
-        mAuth = FirebaseAuth.getInstance();
 
     }
 

@@ -1,10 +1,7 @@
 package com.example.daniel.ucscparking;
 
-import android.app.Dialog;
-import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -16,23 +13,17 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.android.gms.common.api.GoogleApi;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -58,22 +49,36 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class HomeActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier, OnMapReadyCallback {
+public class HomeActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier, OnMapReadyCallback, FilterDialog.FilterDialogListener {
 
     private final double MAX_DISTANCE_FROM_BEACON = 1.0;
 
-    private final int CAMPUS_ID = 2;
+    private final String CAMPUS_ID = "2";
+    private final String EAST_REMOTE_ID = "104";
+    private final String WEST_REMOTE_ID = "127";
+    private final String WEST_CORE_ID = "112";
+    private final String COWELL_ID = "18";
+    private final String STEVENSON_ID = "18";
+    private final String CROWN_ID = "16";
+    private final String MERILL_ID = "17";
+    private final String KRESGE_ID = "13";
+    private final String PORTER_ID = "14";
+    private final String OAKES_ID = "12";
+    private final String RC_ID = "21";
+    private final String C9_ID = "15";
+    private final String C10_ID = "15";
+    //    private final int C19_ID = 15;
+//    private final int CS_ID = 18;
+//    private final int HAHN_ID = 2;
+    private final String BASKIN_ID = "19";
+//    private final int OPERS_ID = 2;
+
 
     private static final String TAG = "HomeActivity";
 
@@ -86,10 +91,52 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
     private GoogleApiClient googleApiClient;
     private TextView availSpots;
     private String spotId = "0";
+    private boolean ucsc_flag = false;
+//    private int area_id;
 
-    String freeSpots = "";
+    String numSpots = "";
     String freeSpotList = "";
     String[] freeSpotArray;
+    ArrayList<String> freeSpots;
+    ArrayList<Marker> markerList;
+
+    boolean[] filterLots = {
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+    };
+
+    String[] idArray = {
+            EAST_REMOTE_ID,
+            WEST_REMOTE_ID,
+            WEST_CORE_ID,
+            COWELL_ID,
+            STEVENSON_ID,
+            CROWN_ID,
+            MERILL_ID,
+            KRESGE_ID,
+            PORTER_ID,
+            OAKES_ID,
+            RC_ID,
+            C9_ID,
+            C10_ID,
+            //    C19_ID,
+            //    CS_ID,
+            //    HAHN_ID,
+            //    OPERS_ID,
+            BASKIN_ID
+    };
 
     String name;
     String email;
@@ -98,8 +145,11 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
     private BeaconManager mBeaconManager;
     private BackgroundPowerSaver backgroundPowerSaver;
 
-    private ArrayAdapter<String> arrayAdapter;
+    private ArrayAdapter<String> bluetoothArrayAdapter;
     private ArrayList<String> bluetoothArray;
+
+    private ArrayAdapter<String> freeSpotsArrayAdapter;
+
 
     private static class eventParams {
         String report_gateway_id;
@@ -127,7 +177,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         }
     }
 
-    private class ClaimSpot extends AsyncTask<claimParams, Void, Void>{
+    private class ClaimSpot extends AsyncTask<claimParams, Void, Void> {
 
         @Override
         protected Void doInBackground(claimParams... params) {
@@ -154,11 +204,11 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
 
                 String inputLine;
 
-                while((inputLine = in.readLine()) != null)
+                while ((inputLine = in.readLine()) != null)
                     System.out.println(inputLine);
                 in.close();
 
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -199,7 +249,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                 while ((inputLine = in.readLine()) != null)
                     System.out.println(inputLine);
                 in.close();
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -273,16 +323,50 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         // Add a marker in Santa Cruz and move the camera
         LatLng ucsc = new LatLng(36.9915, -122.0583);
         LatLng eastRemote = new LatLng(36.9910, -122.0532);
-        LatLng westRemote = new LatLng(36.9885, -122.0648);
-        LatLng westCore = new LatLng(36.999173, -122.063669);
+        LatLng westRemote = new LatLng(36.988555, -122.065900);
+        LatLng westCore = new LatLng(36.999077, -122.063677);
+        LatLng cowell = new LatLng(36.997126, -122.054269);
+        LatLng stevenson = new LatLng(36.9970, -122.0517);
+        LatLng crown = new LatLng(36.9996, -122.0550);
+        LatLng merill = new LatLng(36.9999, -122.0533);
+        LatLng kresge = new LatLng(36.9972, -122.0668);
+        LatLng porter = new LatLng(36.994394, -122.065221);
+        LatLng oakes = new LatLng(36.989029, -122.064636);
+        LatLng rc = new LatLng(36.9912, -122.0647);
+        LatLng c9 = new LatLng(37.001581, -122.057262);
+        LatLng c10 = new LatLng(37.0004, -122.0584);
+        LatLng hahn = new LatLng(36.996082, -122.057033);
+        LatLng baskin = new LatLng(37.000370, -122.063237);
+        LatLng opers = new LatLng(36.995032, -122.054087);
 
-        parkingMap.addMarker(new MarkerOptions().position(ucsc).title("UC Santa Cruz"));
-        parkingMap.addMarker(new MarkerOptions().position(eastRemote).title("East Remote"));
-        parkingMap.addMarker(new MarkerOptions().position(westRemote).title("West Remote"));
-        parkingMap.addMarker(new MarkerOptions().position(westCore).title("West Core"));
+        markerList = new ArrayList<Marker>();
+
+        markerList.add(0, parkingMap.addMarker(new MarkerOptions().position(ucsc).title("UC Santa Cruz")));
+        markerList.add(1, parkingMap.addMarker(new MarkerOptions().position(eastRemote).title("East Remote")));
+        markerList.add(2, parkingMap.addMarker(new MarkerOptions().position(westRemote).title("West Remote")));
+        markerList.add(3, parkingMap.addMarker(new MarkerOptions().position(westCore).title("West Core")));
+        markerList.add(4, parkingMap.addMarker(new MarkerOptions().position(cowell).title("Cowell")));
+        markerList.add(5, parkingMap.addMarker(new MarkerOptions().position(stevenson).title("Stevenson")));
+        markerList.add(6, parkingMap.addMarker(new MarkerOptions().position(crown).title("Crown")));
+        markerList.add(7, parkingMap.addMarker(new MarkerOptions().position(merill).title("Merill")));
+        markerList.add(8, parkingMap.addMarker(new MarkerOptions().position(kresge).title("Kresge")));
+        markerList.add(9, parkingMap.addMarker(new MarkerOptions().position(porter).title("Porter")));
+        markerList.add(10, parkingMap.addMarker(new MarkerOptions().position(oakes).title("Oakes")));
+        markerList.add(11, parkingMap.addMarker(new MarkerOptions().position(rc).title("Rachel Carson")));
+        markerList.add(12, parkingMap.addMarker(new MarkerOptions().position(c9).title("College Nine")));
+        markerList.add(13, parkingMap.addMarker(new MarkerOptions().position(c10).title("College Ten")));
+//        markerList.add(2, parkingMap.addMarker(new MarkerOptions().position(hahn).title("Hahn Student Services")));
+        markerList.add(14, parkingMap.addMarker(new MarkerOptions().position(baskin).title("Jack Baskin Engineering")));
+//        markerList.add(2, parkingMap.addMarker(new MarkerOptions().position(opers).title("OPERS"));
+
+//        for(int i = 0; i < filterLots.length; i++){
+//            if(!filterLots[i]){
+//
+//            }
+//        }
 
         parkingMap.moveCamera(CameraUpdateFactory.newLatLng(ucsc));
-        parkingMap.moveCamera(CameraUpdateFactory.zoomTo(14.0f));
+        parkingMap.moveCamera(CameraUpdateFactory.zoomTo(14.5f));
         parkingMap.setMaxZoomPreference(17.0f);
         parkingMap.setMinZoomPreference(11.0f);
         parkingMap.getUiSettings().setZoomControlsEnabled(true);
@@ -292,32 +376,56 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
             public boolean onMarkerClick(Marker marker) {
                 Log.d(TAG, marker.getTitle());
                 switch (marker.getTitle()) {
-//                    case "UC Santa Cruz":
-//                        marker.setSnippet("Free Spots: " + freeSpots);
-//
-//                        return false;
                     case "East Remote":
-                        marker.setSnippet("East Remote Free Spots: " + freeSpots);
-
+                        marker.setSnippet("Free Spots: " + freeSpots.get(1));
                         return false;
                     case "West Remote":
-                        marker.setSnippet("West Remote Free Spots: " + freeSpots);
-
+                        marker.setSnippet("Free Spots: " + freeSpots.get(2));
                         return false;
                     case "West Core":
-                        marker.setSnippet("West Core Free Spots: " + freeSpots);
-
+                        marker.setSnippet("Free Spots: " + freeSpots.get(3));
                         return false;
-//                    case R.id.parking_status:
-//                        marker.setSnippet("Free Spots: " + freeSpots);
-//
-//                        return true;
-//                    case R.id.logout:
-//                        marker.setSnippet("Free Spots: " + freeSpots);
-//
-//                        return true;
+                    case "Cowell":
+                        marker.setSnippet("Free Spots: " + freeSpots.get(4));
+                        return false;
+                    case "Stevenson":
+                        marker.setSnippet("Free Spots: " + freeSpots.get(5));
+                        return false;
+                    case "Crown":
+                        marker.setSnippet("Free Spots: " + freeSpots.get(6));
+                        return false;
+                    case "Merill":
+                        marker.setSnippet("Free Spots: " + freeSpots.get(7));
+                        return false;
+                    case "Kresge":
+                        marker.setSnippet("Free Spots: " + freeSpots.get(8));
+                        return false;
+                    case "Porter":
+                        marker.setSnippet("Free Spots: " + freeSpots.get(9));
+                        return false;
+                    case "Oakes":
+                        marker.setSnippet("Free Spots: " + freeSpots.get(10));
+                        return false;
+                    case "Rachel Carson":
+                        marker.setSnippet("Free Spots: " + freeSpots.get(11));
+                        return false;
+                    case "College Nine":
+                        marker.setSnippet("Free Spots: " + freeSpots.get(12));
+                        return false;
+                    case "College Ten":
+                        marker.setSnippet("Free Spots: " + freeSpots.get(13));
+                        return false;
+//                    case "Hahn Student Services":
+//                        marker.setSnippet("Free Spots: " + numSpots);
+//                        return false;
+                    case "Jack Baskin Engineering":
+                        marker.setSnippet("Free Spots: " + freeSpots.get(14));
+                        return false;
+//                    case "OPERS":
+//                        marker.setSnippet("Free Spots: " + freeSpots[]);
+//                        return false;
                     default:
-                        marker.setSnippet("UCSC Free Spots: " + freeSpots);
+                        marker.setSnippet("Free Spots: " + freeSpots.get(0));
                         return false;
                 }
             }
@@ -374,6 +482,57 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
             fragmentTransaction.hide(parkingListFragment);
             fragmentTransaction.commit();
 
+            /******** Enable Bluetooth Beacon Communication  ********/
+
+            bluetoothArray = new ArrayList<String>();
+            bluetoothArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, bluetoothArray);
+
+
+            mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
+            // Detect the URL frame:
+            mBeaconManager.getBeaconParsers().add(new BeaconParser().
+                    setBeaconLayout(BeaconParser.EDDYSTONE_URL_LAYOUT));
+            mBeaconManager.bind(this);
+            Log.i(TAG, "Binding Beacon Manager");
+
+            /******** Obtain Parking Lot Data from Cloud Datastore  ********/
+
+            freeSpots = new ArrayList<String>();
+            freeSpotsArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, freeSpots);
+            for(int i = 0; i < filterLots.length + 1; i++){
+                freeSpots.add(i, "0");
+            }
+
+//            availSpots = (TextView) findViewById(R.id.available_spots);
+//            availSpots.setText(numSpots + "\n");
+
+            for (int i = 0; i < filterLots.length; i++) {
+                if (filterLots[i]) {
+                    getSpotStatistics(idArray[i], new VolleyCallback() {
+                        @Override
+                        public void onSuccess(String areaId, String result) {
+//                            availSpots = (TextView) findViewById(R.id.available_spots);
+//                            availSpots.setText(numSpots + "\n");
+                            System.out.println("areaID " + areaId + ": " + result);
+
+                        }
+                    });
+//                    System.out.println("freeSpot #" + i + ": " + freeSpots.get(i));
+//                } else {
+//                    freeSpots.set(i, "0");
+                }
+            }
+
+            getSpotStatistics(CAMPUS_ID, new VolleyCallback() {
+                @Override
+                public void onSuccess(String areaId, String result) {
+                    availSpots = (TextView) findViewById(R.id.available_spots);
+                    availSpots.setText(numSpots + "\n");
+                    Log.d(TAG, "Total spots available from Home Screen is " + freeSpots.get(0));
+                }
+            });
+//            Log.d(TAG, "Total spots available from Home Screen is " + freeSpots.get(0));
+
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
                 // Name, email address, and profile photo Url
@@ -392,25 +551,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                 System.out.println(email);
                 System.out.println(emailVerified);
                 System.out.println(uid);
-
             }
-
-            /******** Enable Bluetooth Beacon Communication  ********/
-
-            bluetoothArray = new ArrayList<String>();
-            arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, bluetoothArray);
-
-            mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
-            // Detect the URL frame:
-            mBeaconManager.getBeaconParsers().add(new BeaconParser().
-                    setBeaconLayout(BeaconParser.EDDYSTONE_URL_LAYOUT));
-            mBeaconManager.bind(this);
-            Log.i(TAG, "Binding Beacon Manager");
-
-            /******** Obtain Parking Lot Data from Cloud Datastore  ********/
-
-            String totalSpots = getSpotStatistics(CAMPUS_ID);
-            Log.d(TAG, "Total spots available from Home Screen is " + totalSpots);
 
         }
     }
@@ -425,17 +566,22 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                         " approximately " + beacon.getDistance() + " meters away.");
 
                 spotId = url.substring(8);
-                spotId = spotId.substring(0, spotId.length()-4);
+                spotId = spotId.substring(0, spotId.length() - 4);
 
-                if(!bluetoothArray.contains("Spot Number: " + spotId) && beacon.getDistance() < MAX_DISTANCE_FROM_BEACON) {
+                if (!bluetoothArray.contains("Spot Number: " + spotId) && beacon.getDistance() < MAX_DISTANCE_FROM_BEACON) {
                     bluetoothArray.add("Spot Number: " + spotId);
-                    arrayAdapter.notifyDataSetChanged();
+                    bluetoothArrayAdapter.notifyDataSetChanged();
                 }
             }
         }
     }
 
-    private String getSpotStatistics(int areaId){
+    public interface VolleyCallback {
+        void onSuccess(String areaId, String result);
+    }
+
+    private void getSpotStatistics(String areaId, final VolleyCallback callback) {
+
         String getSpotsUrl = "https://cmpe-123a-18-g11.appspot.com/get-statistics?";
         getSpotsUrl = getSpotsUrl + "message+type=get+statistics&";
         getSpotsUrl = getSpotsUrl + "area+id=" + areaId;
@@ -446,7 +592,8 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            freeSpots = response.getString("free spot number");
+                            String totalFreeSpots = response.getString("free spot number");
+                            String area_id = response.getString("area id");
                             freeSpotList = response.getString("free spot list");
                             freeSpotArray = freeSpotList.split(", ");
 
@@ -465,9 +612,62 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                                 free += freeSpotArray[i] + " ";
 
                             }
-                            availSpots = (TextView) findViewById(R.id.available_spots);
+                            switch (area_id) {
+                                case EAST_REMOTE_ID:
+                                    freeSpots.set(1, totalFreeSpots);
+                                    break;
+                                case WEST_REMOTE_ID:
+                                    freeSpots.set(2, totalFreeSpots);
+                                    break;
+                                case WEST_CORE_ID:
+                                    freeSpots.set(3, totalFreeSpots);
+                                    break;
+                                case COWELL_ID:
+                                    freeSpots.set(4, totalFreeSpots);
+                                    freeSpots.set(5, totalFreeSpots);
+                                    break;
+//            case STEVENSON_ID:
+//                freeSpots[5] = numSpots;
+//                return freeSpots[5];
+                                case CROWN_ID:
+                                    freeSpots.set(6, totalFreeSpots);
+                                    break;
+                                case MERILL_ID:
+                                    freeSpots.set(7, totalFreeSpots);
+                                    break;
+                                case KRESGE_ID:
+                                    freeSpots.set(8, totalFreeSpots);
+                                    break;
+                                case PORTER_ID:
+                                    freeSpots.set(9, totalFreeSpots);
+                                    break;
+                                case OAKES_ID:
+                                    freeSpots.set(10, totalFreeSpots);
+                                    break;
+                                case RC_ID:
+                                    freeSpots.set(11, totalFreeSpots);
+                                    break;
+                                case C9_ID:
+                                    freeSpots.set(12, totalFreeSpots);
+                                    freeSpots.set(13, totalFreeSpots);
+                                    break;
+//            case C10_ID:
+//                freeSpots[13] = numSpots;
+//                return freeSpots[13];
+                                case BASKIN_ID:
+                                    freeSpots.set(14, totalFreeSpots);
+                                    break;
+                                default:
+                                    freeSpots.set(0, totalFreeSpots);
+                                    numSpots = totalFreeSpots;
+//                                    availSpots = (TextView) findViewById(R.id.available_spots);
+//                                    availSpots.setText(numSpots + "\n");
+                            }
 
-                            availSpots.setText(freeSpots + "\n");
+                            callback.onSuccess(area_id, totalFreeSpots);
+
+//                            availSpots = (TextView) findViewById(R.id.available_spots);
+//                            availSpots.setText(numSpots + "\n");
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -480,11 +680,15 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                         error.printStackTrace();
                     }
                 });
-
-// Access the RequestQueue through your singleton class.
+        // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(HomeActivity.this).addToRequestQueue(jsonObjectRequest);
 
-        return freeSpots;
+//        return numSpots;
+    }
+
+    @Override
+    public void onFinishFilterDialog(boolean[] inputArray) {
+        filterLots = inputArray;
     }
 
     @Override
@@ -520,18 +724,36 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.refresh:
-                String totalSpots = getSpotStatistics(CAMPUS_ID);
-                Log.d(TAG, "Total spots available is " + totalSpots);
+//                for (int i = 0; i < filterLots.length; i++) {
+//                    if (filterLots[i]) {
+//                        getSpotStatistics(idArray[i], new VolleyCallback() {
+//                            @Override
+//                            public void onSuccess(int areaId, String result) {
+//
+//                            }
+//                        });
+//                        System.out.println("freeSpot #" + i + ": " + freeSpots.get(i));
+//                    } else {
+//                        freeSpots.add(i, "0");
+//                    }
+//                }
+                getSpotStatistics(CAMPUS_ID, new VolleyCallback() {
+                    @Override
+                    public void onSuccess(String areaId, String result) {
+
+                    }
+                });
+//                Log.d(TAG, "Total spots available is " + freeSpots.get(0));
 
                 return true;
             case R.id.claim_spot:
                 AlertDialog.Builder b = new AlertDialog.Builder(this);
-                b.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+                b.setAdapter(bluetoothArrayAdapter, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int item) {
                         spotId = bluetoothArray.get(item);
                         bluetoothArray.clear();
-                        arrayAdapter.notifyDataSetChanged();
+                        bluetoothArrayAdapter.notifyDataSetChanged();
 
                         Log.d(TAG, "Spot Id is " + spotId + " and the item selected is " + item);
 
@@ -541,9 +763,16 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                         claimSpot.execute(params);
                     }
                 });
+                b.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+                        bluetoothArray.clear();
+                        bluetoothArrayAdapter.notifyDataSetChanged();
+                    }
+                });
                 AlertDialog instance = b.create();
-                if(!bluetoothArray.isEmpty()) {
-                      instance.show();
+                if (!bluetoothArray.isEmpty()) {
+                    instance.show();
                 }
                 return true;
             case R.id.filter:

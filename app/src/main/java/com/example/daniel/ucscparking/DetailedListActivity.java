@@ -4,38 +4,31 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DatabaseReference;
 
 /**
- * Created by Daniel on 4/29/18.
+ * Created by Daniel on 5/4/18.
  */
 
-public class StatusActivity extends AppCompatActivity {
+public class DetailedListActivity extends AppCompatActivity{
 
-    //    private UserLoginTask mAuthTask = null;
-    private static final String TAG = "StatusActivity";
+        //    private UserLoginTask mAuthTask = null;
+        private static final String TAG = "StatusActivity";
 
 
-    // UI references.
-    private TextView mStatusView;
-    private TextView mSpotView;
-    private TextView mTimeView;
-    private TextView mValidityView;
+        // UI references.
+        private TextView mLotView;
+        private TextView mSpotView;
+        private TextView mTimeView;
+        private TextView mValidityView;
 
-//    private Button mVerifyParking;
+        private FirebaseAuth mAuth;
 
-    private FirebaseAuth mAuth;
-
-    private String name;
-    private String firstName;
-    private String lastName;
+        private String name;
+        private String firstName;
+        private String lastName;
 
 //    private static class accountParams {
 //        String acc_firstName;
@@ -99,25 +92,25 @@ public class StatusActivity extends AppCompatActivity {
 //
 //    }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_status);
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_status);
 
-        mStatusView = (TextView) findViewById(R.id.current_status);;
-        mSpotView = (TextView) findViewById(R.id.parked_spot);;
-        mTimeView = (TextView) findViewById(R.id.time_left);;
-        mValidityView = (TextView) findViewById(R.id.validity);;
+            mLotView = (TextView) findViewById(R.id.current_status);;
+            mSpotView = (TextView) findViewById(R.id.parked_spot);;
+            mTimeView = (TextView) findViewById(R.id.time_left);;
+            mValidityView = (TextView) findViewById(R.id.validity);;
 
 //        mVerifyParking = (Button) findViewById(R.id.scan_spots);
 
-        mStatusView.setText(R.string.not_parked_status);
-        mTimeView.setText(R.string.time_remaining);
-        mValidityView.setText(R.string.invalid_parking);
+            mLotView.setText(R.string.not_parked_status);
+            mTimeView.setText(R.string.time_remaining);
+            mValidityView.setText(R.string.invalid_parking);
 
-        mSpotView.setVisibility(View.GONE);
-        mTimeView.setVisibility(View.GONE);
-        mValidityView.setVisibility(View.GONE);
+            mSpotView.setVisibility(View.GONE);
+            mTimeView.setVisibility(View.GONE);
+            mValidityView.setVisibility(View.GONE);
 
 //        mVerifyParking.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -126,15 +119,15 @@ public class StatusActivity extends AppCompatActivity {
 //            }
 //        });
 
+        }
+
+        private void scanSpots(){
+            Log.d(TAG, "scanSpots");
+
+            mSpotView.setVisibility(View.VISIBLE);
+            mTimeView.setVisibility(View.VISIBLE);
+            mValidityView.setVisibility(View.VISIBLE);
+
+        }
+
     }
-
-    private void scanSpots(){
-        Log.d(TAG, "scanSpots");
-
-        mSpotView.setVisibility(View.VISIBLE);
-        mTimeView.setVisibility(View.VISIBLE);
-        mValidityView.setVisibility(View.VISIBLE);
-
-    }
-
-}

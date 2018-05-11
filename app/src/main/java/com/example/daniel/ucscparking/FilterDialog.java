@@ -28,7 +28,8 @@ public class FilterDialog extends DialogFragment {
             "Oakes",
             "Rachel Carson",
             "College 9",
-            "College 10");
+            "College 10",
+            "Jack Baskin Engineering");
 
     CharSequence[] items = new CharSequence[]{
         "East Remote",
@@ -43,10 +44,12 @@ public class FilterDialog extends DialogFragment {
         "Oakes",
         "Rachel Carson",
         "College 9",
-        "College 10"
+        "College 10",
+        "Jack Baskin Engineering"
     };
 
     static boolean[] checkedItems = {
+            true,
             true,
             true,
             true,
@@ -63,6 +66,7 @@ public class FilterDialog extends DialogFragment {
     };
 
     public static ArrayList<Integer> mSelectedItems;
+    private FilterDialogListener listener;
 
 
     @Override
@@ -87,7 +91,11 @@ public class FilterDialog extends DialogFragment {
                 })
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // Remember selected options and return to home activity
+                        for(int i = 0; i < checkedItems.length; i++) {
+                            System.out.println(checkedItems[i]);
+                        }
+                        listener = (FilterDialogListener) getActivity();
+                        listener.onFinishFilterDialog(checkedItems);
                     }
                 })
                 .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
@@ -97,6 +105,13 @@ public class FilterDialog extends DialogFragment {
                 });
         // Create the AlertDialog object and return it
         return builder.create();
-
     }
+
+    public interface FilterDialogListener {
+        void onFinishFilterDialog(boolean[] inputArray);
+    }
+
+
+
+
 }
