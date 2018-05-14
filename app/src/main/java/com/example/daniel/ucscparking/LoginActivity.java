@@ -84,8 +84,9 @@ public class LoginActivity extends AppCompatActivity{
         mAuth = FirebaseAuth.getInstance();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        if (user != null && user.isEmailVerified()) {
         if (user != null) {
-            // Name, email address, and profile photo Url
+        // Name, email address, and profile photo Url
             name = user.getDisplayName();
             email = user.getEmail();
 
@@ -110,26 +111,12 @@ public class LoginActivity extends AppCompatActivity{
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-//        populateAutoComplete();
-
         mPasswordView = (EditText) findViewById(R.id.password);
-//        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-//                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-//                    attemptLogin();
-//                    return true;
-//                }
-//                return false;
-//            }
-//        });
-
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-//                attemptLogin();
                 signIn(mEmailView.getText().toString(), mPasswordView.getText().toString());
             }
         });
@@ -171,7 +158,7 @@ public class LoginActivity extends AppCompatActivity{
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-                            updateUI(null);
+//                            updateUI(null);
                         }
 
                         // [START_EXCLUDE]
@@ -188,6 +175,7 @@ public class LoginActivity extends AppCompatActivity{
 
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
+//        if (user != null  && user.isEmailVerified()) {
         if (user != null) {
             Intent logInIntent = new Intent(this, HomeActivity.class);
             logInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -196,33 +184,9 @@ public class LoginActivity extends AppCompatActivity{
 
             System.out.println("user email is: " + user.getEmail());
             System.out.println("user verified status is: " + user.isEmailVerified());
-
-//            mStatusView.setText(getString(R.string.emailpassword_status_fmt,
-//                    user.getEmail(), user.isEmailVerified()));
-//            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
-//
-//            findViewById(R.id.email_password_buttons).setVisibility(View.GONE);
-//            findViewById(R.id.email_password_fields).setVisibility(View.GONE);
-//            findViewById(R.id.signed_in_buttons).setVisibility(View.VISIBLE);
-//
-//            findViewById(R.id.verify_email_button).setEnabled(!user.isEmailVerified());
-        } else {
-//            mDetailTextView.setText(null);
-//
-//            findViewById(R.id.email_password_buttons).setVisibility(View.VISIBLE);
-//            findViewById(R.id.email_password_fields).setVisibility(View.VISIBLE);
-//            findViewById(R.id.signed_in_buttons).setVisibility(View.GONE);
+            
         }
     }
-
-
-    //    @Override
-//    public void onStart() {
-//        super.onStart();
-//        // Check if user is signed in (non-null) and update UI accordingly.
-//        FirebaseUser currentUser = mAuth.getCurrentUser();
-//        updateUI(currentUser);
-//    }
 
     private void showProgressDialog() {
         int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
@@ -272,9 +236,6 @@ public class LoginActivity extends AppCompatActivity{
      * errors are presented and no actual login attempt is made.
      */
     private boolean attemptLogin() {
-//        if (mAuthTask != null) {
-//            return;
-//        }
 
         // Reset errors.
         mEmailView.setError(null);
@@ -288,11 +249,11 @@ public class LoginActivity extends AppCompatActivity{
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if(TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
-        } else if(!isPasswordValid(password)){
+        } else if (!isPasswordValid(password)){
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
@@ -309,6 +270,12 @@ public class LoginActivity extends AppCompatActivity{
             cancel = true;
         }
 
+//        if(!mAuth.getCurrentUser().isEmailVerified()){
+//            Toast.makeText(LoginActivity.this, "Email has not yet been verified.",
+//                    Toast.LENGTH_SHORT).show();
+//            cancel = true;
+//        }
+
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
@@ -316,11 +283,6 @@ public class LoginActivity extends AppCompatActivity{
             return false;
         } else {
             return true;
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-//            showProgress(true);
-//            mAuthTask = new UserLoginTask(email, password);
-//            mAuthTask.execute((Void) null);
         }
     }
 
@@ -333,41 +295,5 @@ public class LoginActivity extends AppCompatActivity{
         //TODO: Replace this with your own logic
         return password.length() >= 6;
     }
-
-//    /**
-//     * Shows the progress UI and hides the login form.
-//     */
-//    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-//    private void showProgress(final boolean show) {
-//        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-//        // for very easy animations. If available, use these APIs to fade-in
-//        // the progress spinner.
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-//            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-//
-//            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-//            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-//                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-//                }
-//            });
-//
-//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-//            mProgressView.animate().setDuration(shortAnimTime).alpha(
-//                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-//                }
-//            });
-//        } else {
-//            // The ViewPropertyAnimator APIs are not available, so simply show
-//            // and hide the relevant UI components.
-//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-//            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-//        }
-//    }
 }
 

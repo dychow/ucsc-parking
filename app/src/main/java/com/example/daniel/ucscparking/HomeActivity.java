@@ -77,12 +77,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
     private final String RC_ID = "21";
     private final String C9_ID = "15";
     private final String C10_ID = "15";
-    //    private final int C19_ID = 15;
-//    private final int CS_ID = 18;
-//    private final int HAHN_ID = 2;
     private final String BASKIN_ID = "19";
-//    private final int OPERS_ID = 2;
-
 
     private static final String TAG = "HomeActivity";
 
@@ -96,7 +91,6 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
     private TextView availSpots;
     private String spotId = "0";
     private boolean ucsc_flag = false;
-//    private int area_id;
 
     String numSpots = "";
     String freeSpotList = "";
@@ -151,10 +145,6 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
             RC_ID,
             C9_ID,
             C10_ID,
-            //    C19_ID,
-            //    CS_ID,
-            //    HAHN_ID,
-            //    OPERS_ID,
             BASKIN_ID
     };
 
@@ -211,8 +201,25 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
 
                 String inputLine;
 
-                while ((inputLine = in.readLine()) != null)
+                while ((inputLine = in.readLine()) != null) {
                     System.out.println(inputLine);
+                    if (inputLine.contains("illegal")) {
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString("parking status", "illegal");
+                        editor.putString("spot", params[0].claim_spotId);
+                        editor.apply();
+                    } else if (inputLine.contains("legal")) {
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString("parking status", "legal");
+                        editor.putString("spot", params[0].claim_spotId);
+                        editor.apply();
+                    } else {
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString("parking status", "");
+                        editor.putString("spot", "");
+                        editor.apply();
+                    }
+                }
                 in.close();
 
             } catch (Exception e) {
@@ -308,9 +315,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         markerList.add(11, parkingMap.addMarker(new MarkerOptions().position(rc).title("Rachel Carson")));
         markerList.add(12, parkingMap.addMarker(new MarkerOptions().position(c9).title("College Nine")));
         markerList.add(13, parkingMap.addMarker(new MarkerOptions().position(c10).title("College Ten")));
-//        markerList.add(2, parkingMap.addMarker(new MarkerOptions().position(hahn).title("Hahn Student Services")));
         markerList.add(14, parkingMap.addMarker(new MarkerOptions().position(baskin).title("Jack Baskin Engineering")));
-//        markerList.add(2, parkingMap.addMarker(new MarkerOptions().position(opers).title("OPERS"));
 
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -322,14 +327,6 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                 markerList.get(i+1).setVisible(true);
             }
         }
-
-//        for(int i = 0; i < filterLots.length; i++){
-//            if(!filterLots[i]){
-//                markerList.get(i+1).setVisible(false);
-//            } else {
-//                markerList.get(i+1).setVisible(true);
-//            }
-//        }
 
         parkingMap.moveCamera(CameraUpdateFactory.newLatLng(ucsc));
         parkingMap.moveCamera(CameraUpdateFactory.zoomTo(14.5f));
@@ -381,15 +378,9 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                     case "College Ten":
                         marker.setSnippet("Free Spots: " + freeSpots.get(13));
                         return false;
-//                    case "Hahn Student Services":
-//                        marker.setSnippet("Free Spots: " + numSpots);
-//                        return false;
                     case "Jack Baskin Engineering":
                         marker.setSnippet("Free Spots: " + freeSpots.get(14));
                         return false;
-//                    case "OPERS":
-//                        marker.setSnippet("Free Spots: " + freeSpots[]);
-//                        return false;
                     default:
                         marker.setSnippet("Free Spots: " + freeSpots.get(0));
                         return false;
@@ -421,93 +412,94 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
 
 
         if (findViewById(R.id.fragment_container) != null) {
-//
-//            // However, if we're being restored from a previous state,
-//            // then we don't need to do anything and should return or else
-//            // we could end up with overlapping fragments.
+
+            // If we're being restored from a previous state,
+            // then we don't need to do anything and should return or else
+            // we could end up with overlapping fragments.
             if (savedInstanceState != null) {
                 return;
-            }
+            } else {
 
-            parkingMapFragment = (SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.fragment_container);
+                parkingMapFragment = (SupportMapFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.fragment_container);
 
-            homeFragment = new HomeFragment();
-            parkingMapFragment = SupportMapFragment.newInstance();
-            parkingListFragment = new ParkingListFragment();
+                homeFragment = new HomeFragment();
+                parkingMapFragment = SupportMapFragment.newInstance();
+                parkingListFragment = new ParkingListFragment();
 
-            if (parkingMapFragment != null) {
-                parkingMapFragment.getMapAsync(HomeActivity.this);
-            }
-
-            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.add(R.id.fragment_container, parkingMapFragment);
-            fragmentTransaction.add(R.id.fragment_container, parkingListFragment);
-            fragmentTransaction.add(R.id.fragment_container, homeFragment);
-            fragmentTransaction.hide(parkingMapFragment);
-            fragmentTransaction.hide(parkingListFragment);
-            fragmentTransaction.commit();
-
-            /******** Enable Bluetooth Beacon Communication  ********/
-
-            bluetoothArray = new ArrayList<String>();
-            bluetoothArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, bluetoothArray);
-
-
-            mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
-            // Detect the URL frame:
-            mBeaconManager.getBeaconParsers().add(new BeaconParser().
-                    setBeaconLayout(BeaconParser.EDDYSTONE_URL_LAYOUT));
-            mBeaconManager.bind(this);
-            Log.i(TAG, "Binding Beacon Manager");
-
-            /******** Obtain Parking Lot Data from Cloud Datastore  ********/
-
-            freeSpots = new ArrayList<String>();
-            freeSpotsArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, freeSpots);
-            for(int i = 0; i < filterLots.length + 1; i++){
-                freeSpots.add(i, "0");
-            }
-
-            for (int i = 0; i < filterLots.length; i++) {
-                if (filterLots[i]) {
-                    getSpotStatistics(idArray[i], new VolleyCallback() {
-                        @Override
-                        public void onSuccess(String areaId, String result) {
-                            System.out.println("areaID " + areaId + ": " + result);
-
-                        }
-                    });
+                if (parkingMapFragment != null) {
+                    parkingMapFragment.getMapAsync(HomeActivity.this);
                 }
-            }
 
-            getSpotStatistics(CAMPUS_ID, new VolleyCallback() {
-                @Override
-                public void onSuccess(String areaId, String result) {
-                    availSpots = (TextView) findViewById(R.id.available_spots);
-                    availSpots.setText(numSpots + "\n");
-                    Log.d(TAG, "Total spots available from Home Screen is " + freeSpots.get(0));
+                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.add(R.id.fragment_container, parkingMapFragment);
+                fragmentTransaction.add(R.id.fragment_container, parkingListFragment);
+                fragmentTransaction.add(R.id.fragment_container, homeFragment);
+                fragmentTransaction.hide(parkingMapFragment);
+                fragmentTransaction.hide(parkingListFragment);
+                fragmentTransaction.commit();
+
+                /******** Enable Bluetooth Beacon Communication  ********/
+
+                bluetoothArray = new ArrayList<String>();
+                bluetoothArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, bluetoothArray);
+
+
+                mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
+                // Detect the URL frame:
+                mBeaconManager.getBeaconParsers().add(new BeaconParser().
+                        setBeaconLayout(BeaconParser.EDDYSTONE_URL_LAYOUT));
+                mBeaconManager.bind(this);
+                Log.i(TAG, "Binding Beacon Manager");
+
+                /******** Obtain Parking Lot Data from Cloud Datastore  ********/
+
+                freeSpots = new ArrayList<String>();
+                freeSpotsArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, freeSpots);
+                for (int i = 0; i < filterLots.length + 1; i++) {
+                    freeSpots.add(i, "0");
                 }
-            });
 
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            if (user != null) {
-                // Name and email address
-                name = user.getDisplayName();
-                email = user.getEmail();
+                for (int i = 0; i < filterLots.length; i++) {
+                    if (filterLots[i]) {
+                        getSpotStatistics(idArray[i], new VolleyCallback() {
+                            @Override
+                            public void onSuccess(String areaId, String result) {
+                                System.out.println("areaID " + areaId + ": " + result);
 
-                // Check if user's email is verified
-                boolean emailVerified = user.isEmailVerified();
+                            }
+                        });
+                    }
+                }
 
-                // The user's ID, unique to the Firebase project. Do NOT use this value to
-                // authenticate with your backend server, if you have one. Use
-                // FirebaseUser.getToken() instead.
-                String uid = user.getUid();
+                getSpotStatistics(CAMPUS_ID, new VolleyCallback() {
+                    @Override
+                    public void onSuccess(String areaId, String result) {
+                        availSpots = (TextView) findViewById(R.id.available_spots);
+                        availSpots.setText(numSpots + "\n");
+                        Log.d(TAG, "Total spots available from Home Screen is " + freeSpots.get(0));
+                    }
+                });
 
-                System.out.println(name);
-                System.out.println(email);
-                System.out.println(emailVerified);
-                System.out.println(uid);
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                if (user != null) {
+                    // Name and email address
+                    name = user.getDisplayName();
+                    email = user.getEmail();
+
+                    // Check if user's email is verified
+                    boolean emailVerified = user.isEmailVerified();
+
+                    // The user's ID, unique to the Firebase project. Do NOT use this value to
+                    // authenticate with your backend server, if you have one. Use
+                    // FirebaseUser.getToken() instead.
+                    String uid = user.getUid();
+
+                    System.out.println(name);
+                    System.out.println(email);
+                    System.out.println(emailVerified);
+                    System.out.println(uid);
+                }
             }
 
         }
@@ -551,24 +543,24 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                         try {
                             String totalFreeSpots = response.getString("free spot number");
                             String area_id = response.getString("area id");
-                            freeSpotList = response.getString("free spot list");
-                            freeSpotArray = freeSpotList.split(", ");
-
-                            String free = "";
-
-
-                            for (int i = 0; i < freeSpotArray.length; i++) {
-                                CharSequence c1 = "[";
-                                CharSequence c2 = "]";
-                                if (freeSpotArray[i].contains(c1)) {
-                                    freeSpotArray[i] = freeSpotArray[i].split("\\[")[1];
-                                } else if (freeSpotArray[i].contains(c2)) {
-                                    freeSpotArray[i] = freeSpotArray[i].split("\\]")[0];
-                                }
-
-                                free += freeSpotArray[i] + " ";
-
-                            }
+//                            freeSpotList = response.getString("free spot list");
+//                            freeSpotArray = freeSpotList.split(", ");
+//
+//                            String free = "";
+//
+//
+//                            for (int i = 0; i < freeSpotArray.length; i++) {
+//                                CharSequence c1 = "[";
+//                                CharSequence c2 = "]";
+//                                if (freeSpotArray[i].contains(c1)) {
+//                                    freeSpotArray[i] = freeSpotArray[i].split("\\[")[1];
+//                                } else if (freeSpotArray[i].contains(c2)) {
+//                                    freeSpotArray[i] = freeSpotArray[i].split("\\]")[0];
+//                                }
+//
+//                                free += freeSpotArray[i] + " ";
+//
+//                            }
                             switch (area_id) {
                                 case EAST_REMOTE_ID:
                                     freeSpots.set(1, totalFreeSpots);
@@ -714,7 +706,6 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                         bluetoothArrayAdapter.notifyDataSetChanged();
 
                         Log.d(TAG, "Spot Id is " + spotId + " and the item selected is " + item);
-
 
                         claimParams params = new claimParams(email, "userKey", spotId);
                         ClaimSpot claimSpot = new ClaimSpot();

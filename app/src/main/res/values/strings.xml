@@ -52,7 +52,8 @@
     <string name="time_remaining">Time Remaining: </string>
     <string name="valid_parking">Valid</string>
     <string name="invalid_parking">Invalid</string>
-    <string name="scan_spots">Verify Parking</string>
+    <string name="verify_spot">Verify Parking</string>
+    <string name="cancel_spot">Cancel Parking</string>
 
     <!-- Strings related to bluetooth -->
     <string name="nearby_spots">Nearby Spots</string>

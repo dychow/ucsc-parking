@@ -209,7 +209,7 @@ public class RegisterActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
+                            final FirebaseUser user = mAuth.getCurrentUser();
                             String name = firstName + " " + lastName;
 
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
@@ -224,7 +224,22 @@ public class RegisterActivity extends AppCompatActivity {
                             CreateAccount newAccount = new CreateAccount();
                             newAccount.execute(params);
 
-                            // TODO email verification
+                            user.sendEmailVerification()
+                                    .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener() {
+                                        @Override
+                                        public void onComplete(@NonNull Task task) {
+                                            if (task.isSuccessful()) {
+                                                Toast.makeText(RegisterActivity.this,
+                                                        "Verification email sent to " + user.getEmail(),
+                                                        Toast.LENGTH_SHORT).show();
+                                            } else {
+                                                Log.e(TAG, "sendEmailVerification", task.getException());
+                                                Toast.makeText(RegisterActivity.this,
+                                                        "Failed to send verification email.",
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
 
                             updateUI(user);
                         } else {
@@ -242,7 +257,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
-        if (user != null) {
+        if (user != null && user.isEmailVerified()) {
             Intent logInIntent = new Intent(this, HomeActivity.class);
             logInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(logInIntent);
@@ -252,7 +267,13 @@ public class RegisterActivity extends AppCompatActivity {
             System.out.println("user verified status is: " + user.isEmailVerified());
 
         } else {
-
+            Toast.makeText(RegisterActivity.this,
+                    "Must verify email",
+                    Toast.LENGTH_SHORT).show();
+            Intent logInIntent = new Intent(this, LoginActivity.class);
+            logInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(logInIntent);
+            finish();
         }
     }
 

@@ -54,12 +54,21 @@
                 android:singleLine="true" />
 
             <Button
-                android:id="@+id/scan_spots"
+                android:id="@+id/verify_spot"
                 style="?android:textAppearanceSmall"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/scan_spots"
+                android:text="@string/verify_spot"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/cancel_spot"
+                style="?android:textAppearanceSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/cancel_spot"
                 android:textStyle="bold" />
 
         </LinearLayout>

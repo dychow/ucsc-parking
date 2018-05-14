@@ -1,5 +1,7 @@
 package com.example.daniel.ucscparking;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -29,6 +31,8 @@ public class StatusActivity extends AppCompatActivity {
     private TextView mValidityView;
 
     private Button mVerifyParking;
+    private Button mCancelParking;
+
 
     private FirebaseAuth mAuth;
 
@@ -36,67 +40,7 @@ public class StatusActivity extends AppCompatActivity {
     private String firstName;
     private String lastName;
 
-//    private static class accountParams {
-//        String acc_firstName;
-//        String acc_lastName;
-//        String acc_loginId;
-//        String acc_password;
-//
-//        accountParams(String firstName, String lastName, String loginId, String password) {
-//            this.acc_firstName = firstName;
-//            this.acc_lastName = lastName;
-//            this.acc_loginId = loginId;
-//            this.acc_password = password;
-//        }
-//    }
-//
-//    private class CreateAccount extends AsyncTask<accountParams, Void, Void>{
-//
-//        @Override
-//        protected Void doInBackground(accountParams... params) {
-//            // TODO Auto-generated method stub
-//
-//            System.out.println("Inside doInBackground");
-//
-//            String editUserUrl = "https://cmpe-123a-18-g11.appspot.com/edit-user?";
-//            try {
-//
-//                String final_str = editUserUrl + "message+type=user+register&";
-//                final_str = final_str + "first+name=" + params[0].acc_firstName + "&";
-//                final_str = final_str + "last+name=" + params[0].acc_lastName + "&";
-//                final_str = final_str + "user+email=" + params[0].acc_loginId + "&";
-//                final_str = final_str + "user+pwd=" + params[0].acc_password;
-//
-//
-//                URL link = new URL(final_str);
-//                URLConnection con = link.openConnection();
-//                BufferedReader in = new BufferedReader(
-//                        new InputStreamReader(
-//                                con.getInputStream()
-//                        )
-//                );
-//
-//                String inputLine;
-//
-//                while((inputLine = in.readLine()) != null)
-//                    System.out.println(inputLine);
-//                in.close();
-//            }catch(Exception e){
-//                e.printStackTrace();
-//            }
-//
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Void res) {
-//
-//            System.out.println("Inside onPostExecute");
-//
-//        }
-//
-//
-//    }
+    SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +52,8 @@ public class StatusActivity extends AppCompatActivity {
         mTimeView = (TextView) findViewById(R.id.time_left);
         mValidityView = (TextView) findViewById(R.id.validity);
 
-        mVerifyParking = (Button) findViewById(R.id.scan_spots);
+        mVerifyParking = (Button) findViewById(R.id.verify_spot);
+        mCancelParking = (Button) findViewById(R.id.cancel_spot);
 
         mStatusView.setText(R.string.not_parked_status);
         mTimeView.setText(R.string.time_remaining);
@@ -117,23 +62,70 @@ public class StatusActivity extends AppCompatActivity {
         mSpotView.setVisibility(View.GONE);
         mTimeView.setVisibility(View.GONE);
         mValidityView.setVisibility(View.GONE);
+        mCancelParking.setVisibility(View.GONE);
 
         mVerifyParking.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scanSpots();
+                verifySpot();
+            }
+        });
+
+        mCancelParking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cancelSpot();
             }
         });
 
     }
 
-    private void scanSpots(){
-        Log.d(TAG, "scanSpots");
+    private void verifySpot(){
+        Log.d(TAG, "verifySpot");
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        String validity = sharedPref.getString("parking status", "");
+        if(validity == "legal"){
+            mStatusView.setText("You are currently parked in spot: ");
 
-        mSpotView.setVisibility(View.VISIBLE);
-        mTimeView.setVisibility(View.VISIBLE);
-        mValidityView.setVisibility(View.VISIBLE);
+            mSpotView.setText(sharedPref.getString("spot", ""));
+            mSpotView.setVisibility(View.VISIBLE);
+
+            mValidityView.setText("Valid");
+            mValidityView.setVisibility(View.VISIBLE);
+
+            mCancelParking.setVisibility(View.VISIBLE);
+            mVerifyParking.setVisibility(View.GONE);
+        } else if (validity == "illegal") {
+            mStatusView.setText("You are currently parked in spot: ");
+
+            mSpotView.setText(sharedPref.getString("spot", ""));
+            mSpotView.setVisibility(View.VISIBLE);
+
+            mValidityView.setText("Invalid");
+            mValidityView.setVisibility(View.VISIBLE);
+
+            mCancelParking.setVisibility(View.VISIBLE);
+            mVerifyParking.setVisibility(View.GONE);
+        } else {
+            mStatusView.setText("You are currently not parked");
+
+            mSpotView.setText("");
+            mSpotView.setVisibility(View.GONE);
+
+            mValidityView.setText("Invalid");
+            mValidityView.setVisibility(View.GONE);
+
+        }
 
     }
+
+    private void cancelSpot() {
+        Log.d(TAG, "cancelSpot");
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("parking status", "");
+        editor.putString("spot", "");
+        editor.apply();
+    }
+
 
 }
