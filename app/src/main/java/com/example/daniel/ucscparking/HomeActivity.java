@@ -85,16 +85,10 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
     private SupportMapFragment parkingMapFragment;
     private Fragment homeFragment;
     private ListFragment parkingListFragment;
-    private DatabaseReference mDatabaseReference;
-    private ValueEventListener databaseListener;
-    private GoogleApiClient googleApiClient;
     private TextView availSpots;
     private String spotId = "0";
-    private boolean ucsc_flag = false;
 
     String numSpots = "";
-    String freeSpotList = "";
-    String[] freeSpotArray;
     ArrayList<String> freeSpots;
     ArrayList<Marker> markerList;
 
@@ -162,6 +156,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
     SharedPreferences sharedPref;
 
 
+    // Create parameters for an asynchronous task that will help users claim a parking spot
     private static class claimParams {
         String claim_email;
         String claim_userKey;
@@ -174,23 +169,23 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         }
     }
 
+    // Define the asynchronous task to help users claim a parking spot
     private class ClaimSpot extends AsyncTask<claimParams, Void, Void> {
 
         @Override
         protected Void doInBackground(claimParams... params) {
-            // TODO Auto-generated method stub
 
             System.out.println("Inside doInBackground");
 
             try {
-
+                // Set the URL that will be used to connect to the cloud
                 String claimSpotUrl = "https://cmpe-123a-18-g11.appspot.com/claim-spot?";
                 claimSpotUrl = claimSpotUrl + "message+type=claim+spot&";
                 claimSpotUrl = claimSpotUrl + "user+email=" + params[0].claim_email + "&";
                 claimSpotUrl = claimSpotUrl + "user+key=" + params[0].claim_userKey + "&";
                 claimSpotUrl = claimSpotUrl + "spot+id=" + params[0].claim_spotId;
 
-
+                // Create a link to the URL and get a response
                 URL link = new URL(claimSpotUrl);
                 URLConnection con = link.openConnection();
                 BufferedReader in = new BufferedReader(
@@ -201,6 +196,8 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
 
                 String inputLine;
 
+                // Check to see what the response was
+                // Change the Shared Preferences file depending on the legality of the parking
                 while ((inputLine = in.readLine()) != null) {
                     System.out.println(inputLine);
                     if (inputLine.contains("illegal")) {
@@ -235,6 +232,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         }
     }
 
+    // Set up the navigation bar for switching between tabs
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener;
 
     {
@@ -276,11 +274,12 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         };
     }
 
+    // Set up the Map display tab
     @Override
     public void onMapReady(GoogleMap googleMap) {
         parkingMap = googleMap;
 
-        // Add a marker in Santa Cruz and move the camera
+        // Initialize the locations of each area
         LatLng ucsc = new LatLng(36.9915, -122.0583);
         LatLng eastRemote = new LatLng(36.9910, -122.0532);
         LatLng westRemote = new LatLng(36.988555, -122.065900);
@@ -299,6 +298,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         LatLng baskin = new LatLng(37.000370, -122.063237);
         LatLng opers = new LatLng(36.995032, -122.054087);
 
+        // Add markers to the map based on each location
         markerList = new ArrayList<Marker>();
 
         markerList.add(0, parkingMap.addMarker(new MarkerOptions().position(ucsc).title("UC Santa Cruz")));
@@ -318,6 +318,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         markerList.add(14, parkingMap.addMarker(new MarkerOptions().position(baskin).title("Jack Baskin Engineering")));
 
 
+        // Make filtered out areas invisible
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         for(int i = 0; i<lots.size(); i++){
             filterLots[i] = sharedPref.getBoolean(lots.get(i), true);
@@ -328,11 +329,14 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
             }
         }
 
+        // Focus the camera onto the UCSC campus
         parkingMap.moveCamera(CameraUpdateFactory.newLatLng(ucsc));
         parkingMap.moveCamera(CameraUpdateFactory.zoomTo(14.5f));
         parkingMap.setMaxZoomPreference(17.0f);
         parkingMap.setMinZoomPreference(11.0f);
         parkingMap.getUiSettings().setZoomControlsEnabled(true);
+
+        // When a user clicks on a marker, the number of free spots is returned
         parkingMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 
             @Override
@@ -389,6 +393,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         });
     }
 
+    // Connect to all beacons nearby
     public void onBeaconServiceConnect() {
         Region region = new Region("all-beacons-region", null, null, null);
         try {
@@ -420,9 +425,9 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                 return;
             } else {
 
+                // Initialize fragments
                 parkingMapFragment = (SupportMapFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.fragment_container);
-
                 homeFragment = new HomeFragment();
                 parkingMapFragment = SupportMapFragment.newInstance();
                 parkingListFragment = new ParkingListFragment();
@@ -431,6 +436,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                     parkingMapFragment.getMapAsync(HomeActivity.this);
                 }
 
+                // Set the user on the Home display
                 FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.add(R.id.fragment_container, parkingMapFragment);
                 fragmentTransaction.add(R.id.fragment_container, parkingListFragment);
@@ -454,12 +460,14 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
 
                 /******** Obtain Parking Lot Data from Cloud Datastore  ********/
 
+                // Initialize the array describing the free spots in each area
                 freeSpots = new ArrayList<String>();
                 freeSpotsArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, freeSpots);
                 for (int i = 0; i < filterLots.length + 1; i++) {
                     freeSpots.add(i, "0");
                 }
 
+                // Fill the array based on what areas have been filtered out
                 for (int i = 0; i < filterLots.length; i++) {
                     if (filterLots[i]) {
                         getSpotStatistics(idArray[i], new VolleyCallback() {
@@ -472,6 +480,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                     }
                 }
 
+                // Obtain the statistics on how many spots there are on all of campus
                 getSpotStatistics(CAMPUS_ID, new VolleyCallback() {
                     @Override
                     public void onSuccess(String areaId, String result) {
@@ -481,6 +490,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                     }
                 });
 
+                // Testing to see if user is logged in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if (user != null) {
                     // Name and email address
@@ -505,6 +515,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         }
     }
 
+    // Obtain information from nearby beacons and store in an array
     @Override
     public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
         for (Beacon beacon : beacons) {
@@ -525,42 +536,31 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         }
     }
 
+    // Callback for getting the spot statistics
     public interface VolleyCallback {
         void onSuccess(String areaId, String result);
     }
 
+    // Obtain spot statistics depending on which area was selected
     private void getSpotStatistics(String areaId, final VolleyCallback callback) {
 
+        // Set the URL that will be used to connect to the cloud
         String getSpotsUrl = "https://cmpe-123a-18-g11.appspot.com/get-statistics?";
         getSpotsUrl = getSpotsUrl + "message+type=get+statistics&";
         getSpotsUrl = getSpotsUrl + "area+id=" + areaId;
 
+        // Get statistics about selected area
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.GET, getSpotsUrl, null, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
+                            // Obtain information
                             String totalFreeSpots = response.getString("free spot number");
                             String area_id = response.getString("area id");
-//                            freeSpotList = response.getString("free spot list");
-//                            freeSpotArray = freeSpotList.split(", ");
-//
-//                            String free = "";
-//
-//
-//                            for (int i = 0; i < freeSpotArray.length; i++) {
-//                                CharSequence c1 = "[";
-//                                CharSequence c2 = "]";
-//                                if (freeSpotArray[i].contains(c1)) {
-//                                    freeSpotArray[i] = freeSpotArray[i].split("\\[")[1];
-//                                } else if (freeSpotArray[i].contains(c2)) {
-//                                    freeSpotArray[i] = freeSpotArray[i].split("\\]")[0];
-//                                }
-//
-//                                free += freeSpotArray[i] + " ";
-//
-//                            }
+
+                            // Set the array based on how many free spots are available for the area
                             switch (area_id) {
                                 case EAST_REMOTE_ID:
                                     freeSpots.set(1, totalFreeSpots);
@@ -611,6 +611,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                                     numSpots = totalFreeSpots;
                             }
 
+                            // Return response when successfully completed
                             callback.onSuccess(area_id, totalFreeSpots);
 
                         } catch (JSONException e) {
@@ -628,6 +629,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         MySingleton.getInstance(HomeActivity.this).addToRequestQueue(jsonObjectRequest);
     }
 
+    // Response when user is done selecting which areas to filter
     @Override
     public void onFinishFilterDialog(boolean[] inputArray) {
         filterLots = inputArray;
@@ -646,6 +648,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         super.onStart();
     }
 
+    // Stop scanning for beacons when app is paused
     @Override
     public void onPause() {
         super.onPause();
@@ -669,11 +672,15 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         return true;
     }
 
+    // Create cases for when an option is selected
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
+
         switch (item.getItemId()) {
             case R.id.refresh:
+                // When user clicks on refresh, spot data is refreshed,
+                // while taking into account which areas were filtered.
+                // This is done to save the amount of data usage from the user
                 for (int i = 0; i < filterLots.length; i++) {
                     if (filterLots[i]) {
                         getSpotStatistics(idArray[i], new VolleyCallback() {
@@ -697,6 +704,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
 
                 return true;
             case R.id.claim_spot:
+                // List of nearby spots is displayed, and user selects which spot they have parked in
                 AlertDialog.Builder b = new AlertDialog.Builder(this);
                 b.setAdapter(bluetoothArrayAdapter, new DialogInterface.OnClickListener() {
                     @Override
@@ -725,19 +733,23 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                 }
                 return true;
             case R.id.filter:
+                // Create a dialog that lets the user filter out which areas they do not want to see
                 DialogFragment dialog = new FilterDialog();
                 dialog.show(getSupportFragmentManager(), "FilterDialog");
 
                 return true;
             case R.id.profile:
+                // Takes the user to a screen to view their personal information
                 Intent profileIntent = new Intent(this, ProfileActivity.class);
                 startActivity(profileIntent);
                 return true;
             case R.id.parking_status:
+                // Takes the user to a screen to view their current parking status
                 Intent statusIntent = new Intent(this, StatusActivity.class);
                 startActivity(statusIntent);
                 return true;
             case R.id.logout:
+                // Logs out the user, and takes the user to the login screen
                 FirebaseAuth.getInstance().signOut();
 
                 Intent logOutIntent = new Intent(this, LoginActivity.class);

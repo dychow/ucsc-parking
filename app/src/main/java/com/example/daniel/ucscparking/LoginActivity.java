@@ -52,25 +52,11 @@ public class LoginActivity extends AppCompatActivity{
 
     private static final String TAG = "LoginActivity";
 
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-//    private UserLoginTask mAuthTask = null;
-
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-
 
     String name;
     String email;
@@ -83,10 +69,12 @@ public class LoginActivity extends AppCompatActivity{
 
         mAuth = FirebaseAuth.getInstance();
 
+        // See if the user is already logged in
+        // If user is logged in and verified, take them to the home screen
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//        if (user != null && user.isEmailVerified()) {
-        if (user != null) {
-        // Name, email address, and profile photo Url
+        if (user != null && user.isEmailVerified()) {
+//        if (user != null) {
+        // Name and email address
             name = user.getDisplayName();
             email = user.getEmail();
 
@@ -113,6 +101,7 @@ public class LoginActivity extends AppCompatActivity{
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mPasswordView = (EditText) findViewById(R.id.password);
 
+        // Button to let user sign in with credentials
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -121,6 +110,7 @@ public class LoginActivity extends AppCompatActivity{
             }
         });
 
+        // Button to let the user make a new account if they do not already have one
         Button mRegisterButton = (Button) findViewById(R.id.email_register_button);
         mRegisterButton.setOnClickListener((new OnClickListener() {
             @Override
@@ -135,6 +125,7 @@ public class LoginActivity extends AppCompatActivity{
 
     }
 
+    // Function to facilitate user login
     private void signIn(String email, String password) {
         Log.d(TAG, "signIn:" + email);
         if (!attemptLogin()) {
@@ -143,7 +134,6 @@ public class LoginActivity extends AppCompatActivity{
 
         showProgressDialog();
 
-        // [START sign_in_with_email]
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -161,22 +151,18 @@ public class LoginActivity extends AppCompatActivity{
 //                            updateUI(null);
                         }
 
-                        // [START_EXCLUDE]
-                        if (!task.isSuccessful()) {
-                            //
-                        }
+//                        if (!task.isSuccessful()) {
+//                        }
                         hideProgressDialog();
-                        // [END_EXCLUDE]
                     }
                 });
-
-        // [END sign_in_with_email]
     }
 
+    // Sends the user to the home screen if they have logged in and are verified
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
-//        if (user != null  && user.isEmailVerified()) {
-        if (user != null) {
+        if (user != null  && user.isEmailVerified()) {
+//        if (user != null) {
             Intent logInIntent = new Intent(this, HomeActivity.class);
             logInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(logInIntent);
@@ -248,7 +234,7 @@ public class LoginActivity extends AppCompatActivity{
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
+        // Check for a valid password
         if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
@@ -259,7 +245,7 @@ public class LoginActivity extends AppCompatActivity{
             cancel = true;
         }
 
-        // Check for a valid email address.
+        // Check for a valid email address
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
@@ -270,14 +256,15 @@ public class LoginActivity extends AppCompatActivity{
             cancel = true;
         }
 
-//        if(!mAuth.getCurrentUser().isEmailVerified()){
-//            Toast.makeText(LoginActivity.this, "Email has not yet been verified.",
-//                    Toast.LENGTH_SHORT).show();
-//            cancel = true;
-//        }
+        // Check if the user is verified
+        if(!mAuth.getCurrentUser().isEmailVerified()){
+            Toast.makeText(LoginActivity.this, "Email has not yet been verified.",
+                    Toast.LENGTH_SHORT).show();
+            cancel = true;
+        }
 
         if (cancel) {
-            // There was an error; don't attempt login and focus the first
+            // There was an error; don't attempt login and focus on the first
             // form field with an error.
             focusView.requestFocus();
             return false;
@@ -286,13 +273,13 @@ public class LoginActivity extends AppCompatActivity{
         }
     }
 
+    // Conditions to make sure that the email is valid
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
+    // Conditions to make sure that the password is valid
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() >= 6;
     }
 }

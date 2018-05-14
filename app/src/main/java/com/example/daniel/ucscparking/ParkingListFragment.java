@@ -79,6 +79,7 @@ public class ParkingListFragment extends ListFragment implements OnItemClickList
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        // Filter the parking areas depending on what is in the Shared Preferences file
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
 
@@ -90,6 +91,7 @@ public class ParkingListFragment extends ListFragment implements OnItemClickList
         adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, spotArray);
         setListAdapter(adapter);
 
+        // Populate the array that will be displayed
         for(int i = 0; i < filterLots.length; i++){
             if(filterLots[i] && !spotArray.contains(lots.get(i))){
                 spotArray.add(lots.get(i));
@@ -101,6 +103,7 @@ public class ParkingListFragment extends ListFragment implements OnItemClickList
         getListView().setOnItemClickListener(this);
     }
 
+    // Create a listener to determine whether the Shared Preferences file has been changed
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
     {
         for(int i = 0; i<lots.size(); i++){
@@ -114,6 +117,7 @@ public class ParkingListFragment extends ListFragment implements OnItemClickList
         adapter.notifyDataSetChanged();
     }
 
+    // Takes user to the more detailed view of the parking area
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Toast.makeText(getActivity(), "Item: " + spotArray.get(position), Toast.LENGTH_SHORT).show();

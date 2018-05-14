@@ -81,7 +81,6 @@ import java.util.List;
  */
 public class RegisterActivity extends AppCompatActivity {
 
-//    private UserLoginTask mAuthTask = null;
     private static final String TAG = "RegisterActivity";
 
 
@@ -95,11 +94,11 @@ public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
-    private AccountManager accountManager;
 
     private String firstName;
     private String lastName;
 
+    // Create parameters for an asynchronous task that will help users register an account on the datastore
     private static class accountParams {
         String acc_firstName;
         String acc_lastName;
@@ -114,27 +113,22 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    // Define the asynchronous task to help users register an account on the datastore
     private class CreateAccount extends AsyncTask<accountParams, Void, Void>{
 
         @Override
         protected Void doInBackground(accountParams... params) {
-            // TODO Auto-generated method stub
 
-            System.out.println("Inside doInBackground");
-
+            // Set the URL that will be used to connect to the cloud
             String createUserUrl = "https://cmpe-123a-18-g11.appspot.com/new-user?";
             try {
-//                Looper.prepare(); //For Preparing Message Pool for the child Thread
-//                HttpClient client = new DefaultHttpClient();
-//                HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
-//                HttpResponse response;
                 String final_str = createUserUrl + "message+type=user+register&";
                 final_str = final_str + "first+name=" + params[0].acc_firstName + "&";
                 final_str = final_str + "last+name=" + params[0].acc_lastName + "&";
                 final_str = final_str + "user+email=" + params[0].acc_loginId + "&";
                 final_str = final_str + "user+pwd=" + params[0].acc_password;
 
-
+                // Create a link to the URL and get a response
                 URL link = new URL(final_str);
                 URLConnection con = link.openConnection();
                 BufferedReader in = new BufferedReader(
@@ -202,6 +196,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         showProgressDialog();
 
+        // Create the user with email and password on Firebase
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -212,6 +207,7 @@ public class RegisterActivity extends AppCompatActivity {
                             final FirebaseUser user = mAuth.getCurrentUser();
                             String name = firstName + " " + lastName;
 
+                            // Update the user's name
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                     .setDisplayName(name).build();
 
@@ -224,6 +220,7 @@ public class RegisterActivity extends AppCompatActivity {
                             CreateAccount newAccount = new CreateAccount();
                             newAccount.execute(params);
 
+                            // Send email to user for verification of identity
                             user.sendEmailVerification()
                                     .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener() {
                                         @Override
@@ -255,6 +252,8 @@ public class RegisterActivity extends AppCompatActivity {
                 });
     }
 
+    // Sends user to login screen so that they can verify their email
+    //  If their email is already verified, they will be taken to the home screen of the app
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null && user.isEmailVerified()) {
@@ -317,11 +316,13 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    // Ensures that the parameters for the account creation are filled
+    // Ensures that email and passwords fulfill conditions
     private boolean validateForm() {
         boolean valid = true;
 
         String email = mEmailView.getText().toString();
-        if (TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(email) && !isEmailValid(email)) {
             mEmailView.setError("Required.");
             valid = false;
         } else {
@@ -329,7 +330,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         String password = mPasswordView.getText().toString();
-        if (TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             mPasswordView.setError("Required.");
             valid = false;
         } else {
@@ -367,13 +368,13 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
 
+    // Conditions to make sure that the email is valid
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
+    // Conditions to make sure that the password is valid
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 6;
     }
 }

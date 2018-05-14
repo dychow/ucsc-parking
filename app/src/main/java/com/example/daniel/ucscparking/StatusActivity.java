@@ -23,7 +23,6 @@ public class StatusActivity extends AppCompatActivity {
 
     private static final String TAG = "StatusActivity";
 
-
     // UI references.
     private TextView mStatusView;
     private TextView mSpotView;
@@ -33,13 +32,6 @@ public class StatusActivity extends AppCompatActivity {
     private Button mVerifyParking;
     private Button mCancelParking;
 
-
-    private FirebaseAuth mAuth;
-
-    private String name;
-    private String firstName;
-    private String lastName;
-
     SharedPreferences sharedPref;
 
     @Override
@@ -47,6 +39,7 @@ public class StatusActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_status);
 
+        // Instantiate views and buttons
         mStatusView = (TextView) findViewById(R.id.current_status);
         mSpotView = (TextView) findViewById(R.id.parked_spot);
         mTimeView = (TextView) findViewById(R.id.time_left);
@@ -55,10 +48,12 @@ public class StatusActivity extends AppCompatActivity {
         mVerifyParking = (Button) findViewById(R.id.verify_spot);
         mCancelParking = (Button) findViewById(R.id.cancel_spot);
 
+        // Set default text
         mStatusView.setText(R.string.not_parked_status);
         mTimeView.setText(R.string.time_remaining);
         mValidityView.setText(R.string.invalid_parking);
 
+        // Hide the views that will display when user is parked
         mSpotView.setVisibility(View.GONE);
         mTimeView.setVisibility(View.GONE);
         mValidityView.setVisibility(View.GONE);
@@ -80,6 +75,7 @@ public class StatusActivity extends AppCompatActivity {
 
     }
 
+    // Set text when user is legally, illegally, or not parked
     private void verifySpot(){
         Log.d(TAG, "verifySpot");
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -119,12 +115,21 @@ public class StatusActivity extends AppCompatActivity {
 
     }
 
+    // User resets the display back to the default "not parked"
     private void cancelSpot() {
         Log.d(TAG, "cancelSpot");
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("parking status", "");
         editor.putString("spot", "");
         editor.apply();
+
+        mStatusView.setText("You are currently not parked");
+
+        mSpotView.setText("");
+        mSpotView.setVisibility(View.GONE);
+
+        mValidityView.setText("Invalid");
+        mValidityView.setVisibility(View.GONE);
     }
 
 

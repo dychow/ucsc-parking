@@ -40,11 +40,7 @@ public class DetailedListActivity extends AppCompatActivity {
     private final String RC_ID = "21";
     private final String C9_ID = "15";
     private final String C10_ID = "15";
-    //    private final int C19_ID = 15;
-//    private final int CS_ID = 18;
-//    private final int HAHN_ID = 2;
     private final String BASKIN_ID = "19";
-//    private final int OPERS_ID = 2;
 
     String[] idArray = {
             EAST_REMOTE_ID,
@@ -60,10 +56,6 @@ public class DetailedListActivity extends AppCompatActivity {
             RC_ID,
             C9_ID,
             C10_ID,
-            //    C19_ID,
-            //    CS_ID,
-            //    HAHN_ID,
-            //    OPERS_ID,
             BASKIN_ID
     };
 
@@ -78,79 +70,18 @@ public class DetailedListActivity extends AppCompatActivity {
     ArrayList<String> freeSpots;
     private ArrayAdapter<String> freeSpotsArrayAdapter;
 
-//    private static class accountParams {
-//        String acc_firstName;
-//        String acc_lastName;
-//        String acc_loginId;
-//        String acc_password;
-//
-//        accountParams(String firstName, String lastName, String loginId, String password) {
-//            this.acc_firstName = firstName;
-//            this.acc_lastName = lastName;
-//            this.acc_loginId = loginId;
-//            this.acc_password = password;
-//        }
-//    }
-//
-//    private class CreateAccount extends AsyncTask<accountParams, Void, Void>{
-//
-//        @Override
-//        protected Void doInBackground(accountParams... params) {
-//            // TODO Auto-generated method stub
-//
-//            System.out.println("Inside doInBackground");
-//
-//            String editUserUrl = "https://cmpe-123a-18-g11.appspot.com/edit-user?";
-//            try {
-//
-//                String final_str = editUserUrl + "message+type=user+register&";
-//                final_str = final_str + "first+name=" + params[0].acc_firstName + "&";
-//                final_str = final_str + "last+name=" + params[0].acc_lastName + "&";
-//                final_str = final_str + "user+email=" + params[0].acc_loginId + "&";
-//                final_str = final_str + "user+pwd=" + params[0].acc_password;
-//
-//
-//                URL link = new URL(final_str);
-//                URLConnection con = link.openConnection();
-//                BufferedReader in = new BufferedReader(
-//                        new InputStreamReader(
-//                                con.getInputStream()
-//                        )
-//                );
-//
-//                String inputLine;
-//
-//                while((inputLine = in.readLine()) != null)
-//                    System.out.println(inputLine);
-//                in.close();
-//            }catch(Exception e){
-//                e.printStackTrace();
-//            }
-//
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Void res) {
-//
-//            System.out.println("Inside onPostExecute");
-//
-//        }
-//
-//
-//    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parking);
 
+        // Instantiate views
         mLotView = (TextView) findViewById(R.id.parking_lot);
         mSpotView = (TextView) findViewById(R.id.lot_spots);
         mListView = (TextView) findViewById(R.id.parking_spots);
 
-        mLotView.setText(R.string.not_parked_status);
 
+        // Get information about what area was selected
         Intent i = getIntent();
         String areaCode = i.getStringExtra("area");
         mLotView.setText(areaCode);
@@ -158,6 +89,7 @@ public class DetailedListActivity extends AppCompatActivity {
         freeSpots = new ArrayList<String>();
         freeSpotsArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, freeSpots);
 
+        // Get statistics about the spots in an area, depending on which area was selected
         switch (areaCode) {
             case "East Remote":
                 getSpotStatistics(EAST_REMOTE_ID, new DetailedListActivity.VolleyCallback() {
@@ -340,9 +272,6 @@ public class DetailedListActivity extends AppCompatActivity {
                 });
 
                 break;
-//                    case "Hahn Student Services":
-//                        marker.setSnippet("Free Spots: " + numSpots);
-//                        break;
             case "Jack Baskin Engineering":
                 getSpotStatistics(BASKIN_ID, new DetailedListActivity.VolleyCallback() {
                     @Override
@@ -357,9 +286,6 @@ public class DetailedListActivity extends AppCompatActivity {
                 });
 
                 break;
-//                    case "OPERS":
-//                        marker.setSnippet("Free Spots: " + freeSpots[]);
-//                        break;
             default:
                 getSpotStatistics(CAMPUS_ID, new DetailedListActivity.VolleyCallback() {
                     @Override
@@ -383,16 +309,19 @@ public class DetailedListActivity extends AppCompatActivity {
 
     private void getSpotStatistics(String areaId, final DetailedListActivity.VolleyCallback callback) {
 
+        // Set the URL that will be used to connect to the cloud
         String getSpotsUrl = "https://cmpe-123a-18-g11.appspot.com/get-statistics?";
         getSpotsUrl = getSpotsUrl + "message+type=get+statistics&";
         getSpotsUrl = getSpotsUrl + "area+id=" + areaId;
 
+        // Get statistics about selected area
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.GET, getSpotsUrl, null, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
+                            // Obtain information
                             String totalFreeSpots = response.getString("free spot number");
                             String area_id = response.getString("area id");
                             freeSpotList = response.getString("free spot list");
@@ -400,7 +329,7 @@ public class DetailedListActivity extends AppCompatActivity {
 
                             String free = "";
 
-
+                            // Put list of spots into an array
                             for (int i = 0; i < freeSpotArray.length; i++) {
                                 CharSequence c1 = "[";
                                 CharSequence c2 = "]";
@@ -417,6 +346,7 @@ public class DetailedListActivity extends AppCompatActivity {
 
                             }
 
+                            // Return response when successfully completed
                             callback.onSuccess(area_id, totalFreeSpots, free);
 
                         } catch (JSONException e) {

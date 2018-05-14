@@ -47,14 +47,9 @@ import java.net.URLConnection;
  */
 public class ProfileActivity extends AppCompatActivity {
 
-    //    private UserLoginTask mAuthTask = null;
     private static final String TAG = "ProfileActivity";
 
-
     // UI references.
-    private TextView mEmailView;
-    private TextView mFirstNameView;
-    private TextView mLastNameView;
     private EditText mEmailEdit;
     private EditText mFirstNameEdit;
     private EditText mLastNameEdit;
@@ -69,68 +64,6 @@ public class ProfileActivity extends AppCompatActivity {
     private String firstName;
     private String lastName;
 
-//    private static class accountParams {
-//        String acc_firstName;
-//        String acc_lastName;
-//        String acc_loginId;
-//        String acc_password;
-//
-//        accountParams(String firstName, String lastName, String loginId, String password) {
-//            this.acc_firstName = firstName;
-//            this.acc_lastName = lastName;
-//            this.acc_loginId = loginId;
-//            this.acc_password = password;
-//        }
-//    }
-//
-//    private class CreateAccount extends AsyncTask<accountParams, Void, Void>{
-//
-//        @Override
-//        protected Void doInBackground(accountParams... params) {
-//            // TODO Auto-generated method stub
-//
-//            System.out.println("Inside doInBackground");
-//
-//            String editUserUrl = "https://cmpe-123a-18-g11.appspot.com/edit-user?";
-//            try {
-//
-//                String final_str = editUserUrl + "message+type=user+register&";
-//                final_str = final_str + "first+name=" + params[0].acc_firstName + "&";
-//                final_str = final_str + "last+name=" + params[0].acc_lastName + "&";
-//                final_str = final_str + "user+email=" + params[0].acc_loginId + "&";
-//                final_str = final_str + "user+pwd=" + params[0].acc_password;
-//
-//
-//                URL link = new URL(final_str);
-//                URLConnection con = link.openConnection();
-//                BufferedReader in = new BufferedReader(
-//                        new InputStreamReader(
-//                                con.getInputStream()
-//                        )
-//                );
-//
-//                String inputLine;
-//
-//                while((inputLine = in.readLine()) != null)
-//                    System.out.println(inputLine);
-//                in.close();
-//            }catch(Exception e){
-//                e.printStackTrace();
-//            }
-//
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Void res) {
-//
-//            System.out.println("Inside onPostExecute");
-//
-//        }
-//
-//
-//    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,14 +72,12 @@ public class ProfileActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
 
+        // Obtain user's name
         name = user.getDisplayName();
         firstName = name.split(" ")[0];
         lastName = name.split(" ")[1];
 
-        mEmailView = (TextView) findViewById(R.id.email);
-        mFirstNameView = (TextView) findViewById(R.id.first_name);
-        mLastNameView = (TextView) findViewById(R.id.last_name);
-
+        // Instantiate views and buttons
         mEmailEdit = (EditText) findViewById(R.id.edit_email);
         mFirstNameEdit = (EditText) findViewById(R.id.edit_first_name);
         mLastNameEdit = (EditText) findViewById(R.id.edit_last_name);
@@ -155,13 +86,7 @@ public class ProfileActivity extends AppCompatActivity {
         mSaveProfile = (Button) findViewById(R.id.save_profile);
         mCancel = (Button) findViewById(R.id.cancel_changes);
 
-        mEmailView.setText(user.getEmail());
-        mFirstNameView.setText(firstName);
-        mLastNameView.setText(lastName);
-        mEmailView.setVisibility(View.GONE);
-        mFirstNameView.setVisibility(View.GONE);
-        mLastNameView.setVisibility(View.GONE);
-
+        // Display user information
         mEmailEdit.setText(user.getEmail());
         mFirstNameEdit.setText(firstName);
         mLastNameEdit.setText(lastName);
@@ -170,6 +95,7 @@ public class ProfileActivity extends AppCompatActivity {
         mFirstNameEdit.setEnabled(false);
         mLastNameEdit.setEnabled(false);
 
+        // Hide buttons for editing profile
         mSaveProfile.setVisibility(View.GONE);
         mCancel.setVisibility(View.GONE);
 
@@ -196,6 +122,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
+    // Allow user to make and save changes
     private void editProfile(){
         Log.d(TAG, "editProfile: " + firstName + " " + lastName);
 
@@ -207,6 +134,7 @@ public class ProfileActivity extends AppCompatActivity {
         mCancel.setVisibility(View.VISIBLE);
     }
 
+    // Saves profile changes on Firebase
     private void saveChanges(){
         Log.d(TAG, "saveChanges");
         firstName = mFirstNameEdit.getText().toString();
@@ -228,6 +156,7 @@ public class ProfileActivity extends AppCompatActivity {
         mCancel.setVisibility(View.GONE);
     }
 
+    // Cancel any changes that the user made
     private void cancelChanges(){
         Log.d(TAG, "cancelChanges");
         mFirstNameEdit.setText(firstName);

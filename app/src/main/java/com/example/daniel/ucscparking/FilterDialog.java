@@ -75,14 +75,16 @@ public class FilterDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // Use the Builder class for convenient dialog construction
-        mSelectedItems = new ArrayList();  // Where we track the selected items
+        // Track the selected items
+        mSelectedItems = new ArrayList();
 
+        // Store the items to keep in a Shared Preferences file
         sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         for(int i = 0; i<lots.size(); i++){
             checkedItems[i] = sharedPref.getBoolean(lots.get(i), true);
         }
 
+        //Build the dialog to let users select which areas to keep or filter out
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.dialog_title)
                 .setMultiChoiceItems(items, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
@@ -101,6 +103,7 @@ public class FilterDialog extends DialogFragment {
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
+                        // Change the Shared Preferences file based on what the user has selected
                         SharedPreferences.Editor editor = sharedPref.edit();
 
                         for(int i = 0; i < checkedItems.length; i++) {
