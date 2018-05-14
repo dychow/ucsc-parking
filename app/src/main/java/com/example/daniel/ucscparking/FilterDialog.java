@@ -1,7 +1,9 @@
 package com.example.daniel.ucscparking;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -67,13 +69,20 @@ public class FilterDialog extends DialogFragment {
 
     public static ArrayList<Integer> mSelectedItems;
     private FilterDialogListener listener;
+    SharedPreferences sharedPref;
+
 
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         mSelectedItems = new ArrayList();  // Where we track the selected items
-        CharSequence[] charSequence = lots.toArray(new CharSequence[lots.size()]);
+
+        sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        for(int i = 0; i<lots.size(); i++){
+            checkedItems[i] = sharedPref.getBoolean(lots.get(i), true);
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.dialog_title)
                 .setMultiChoiceItems(items, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
@@ -91,11 +100,18 @@ public class FilterDialog extends DialogFragment {
                 })
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+
+                        SharedPreferences.Editor editor = sharedPref.edit();
+
                         for(int i = 0; i < checkedItems.length; i++) {
                             System.out.println(checkedItems[i]);
+                            System.out.println(items[i]);
+                            editor.putBoolean(lots.get(i), checkedItems[i]);
                         }
+                        editor.apply();
                         listener = (FilterDialogListener) getActivity();
                         listener.onFinishFilterDialog(checkedItems);
+
                     }
                 })
                 .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {

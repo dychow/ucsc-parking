@@ -87,6 +87,9 @@
         <activity
             android:name=".StatusActivity"
             android:label="@string/title_status" />
+        <activity
+            android:name=".DetailedListActivity"
+            android:label="@string/title_specific_lot" />
     </application>
 
 </manifest>

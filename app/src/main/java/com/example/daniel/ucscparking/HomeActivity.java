@@ -1,7 +1,9 @@
 package com.example.daniel.ucscparking;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -53,7 +55,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 public class HomeActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier, OnMapReadyCallback, FilterDialog.FilterDialogListener {
 
@@ -100,6 +104,22 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
     ArrayList<String> freeSpots;
     ArrayList<Marker> markerList;
 
+    List<String> lots = Arrays.asList(
+            "East Remote",
+            "West Remote",
+            "West Core",
+            "Cowell",
+            "Stevenson",
+            "Crown",
+            "Merill",
+            "Kresge",
+            "Porter",
+            "Oakes",
+            "Rachel Carson",
+            "College 9",
+            "College 10",
+            "Jack Baskin Engineering");
+
     boolean[] filterLots = {
             true,
             true,
@@ -141,7 +161,6 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
     String name;
     String email;
 
-
     private BeaconManager mBeaconManager;
     private BackgroundPowerSaver backgroundPowerSaver;
 
@@ -150,20 +169,8 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
 
     private ArrayAdapter<String> freeSpotsArrayAdapter;
 
+    SharedPreferences sharedPref;
 
-    private static class eventParams {
-        String report_gateway_id;
-        String report_gateway_key;
-        String report_spot;
-        String report_event;
-
-        eventParams(String gateway_id, String gateway_key, String spot, String event) {
-            this.report_gateway_id = gateway_id;
-            this.report_gateway_key = gateway_key;
-            this.report_spot = spot;
-            this.report_event = event;
-        }
-    }
 
     private static class claimParams {
         String claim_email;
@@ -221,51 +228,6 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         }
     }
 
-    private class ReportEvent extends AsyncTask<eventParams, Void, Void> {
-
-        @Override
-        protected Void doInBackground(eventParams... params) {
-            // TODO Auto-generated method stub
-
-            System.out.println("Inside doInBackground");
-
-            try {
-                String reportEventUrl = "https://cmpe-123a-18-g11.appspot.com/report-event?";
-                reportEventUrl = reportEventUrl + "message+type=report+event&";
-                reportEventUrl = reportEventUrl + "gateway+id=1001&";
-                reportEventUrl = reportEventUrl + "gateway+key=not ready&";
-                reportEventUrl = reportEventUrl + "spot=10006&";
-                reportEventUrl = reportEventUrl + "event=arrival";
-
-
-                URL link = new URL(reportEventUrl);
-                URLConnection con = link.openConnection();
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(con.getInputStream())
-                );
-
-                String inputLine;
-
-                while ((inputLine = in.readLine()) != null)
-                    System.out.println(inputLine);
-                in.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void res) {
-
-            System.out.println("Inside onPostExecute");
-
-        }
-
-
-    }
-
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener;
 
     {
@@ -282,15 +244,6 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                         transaction.hide(parkingMapFragment);
                         transaction.show(homeFragment);
                         transaction.commit();
-
-//                        String gateway_id = "";
-//                        String gateway_key = "";
-//                        String spot = "";
-//                        String event = "";
-//
-//                        eventParams params = new eventParams(gateway_id, gateway_key, spot, event);
-//                        ReportEvent reportEvent = new ReportEvent();
-//                        reportEvent.execute(params);
 
                         return true;
                     case R.id.navigation_map:
@@ -359,9 +312,22 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         markerList.add(14, parkingMap.addMarker(new MarkerOptions().position(baskin).title("Jack Baskin Engineering")));
 //        markerList.add(2, parkingMap.addMarker(new MarkerOptions().position(opers).title("OPERS"));
 
+
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        for(int i = 0; i<lots.size(); i++){
+            filterLots[i] = sharedPref.getBoolean(lots.get(i), true);
+            if(!filterLots[i]){
+                markerList.get(i+1).setVisible(false);
+            } else {
+                markerList.get(i+1).setVisible(true);
+            }
+        }
+
 //        for(int i = 0; i < filterLots.length; i++){
 //            if(!filterLots[i]){
-//
+//                markerList.get(i+1).setVisible(false);
+//            } else {
+//                markerList.get(i+1).setVisible(true);
 //            }
 //        }
 
@@ -503,23 +469,15 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                 freeSpots.add(i, "0");
             }
 
-//            availSpots = (TextView) findViewById(R.id.available_spots);
-//            availSpots.setText(numSpots + "\n");
-
             for (int i = 0; i < filterLots.length; i++) {
                 if (filterLots[i]) {
                     getSpotStatistics(idArray[i], new VolleyCallback() {
                         @Override
                         public void onSuccess(String areaId, String result) {
-//                            availSpots = (TextView) findViewById(R.id.available_spots);
-//                            availSpots.setText(numSpots + "\n");
                             System.out.println("areaID " + areaId + ": " + result);
 
                         }
                     });
-//                    System.out.println("freeSpot #" + i + ": " + freeSpots.get(i));
-//                } else {
-//                    freeSpots.set(i, "0");
                 }
             }
 
@@ -531,11 +489,10 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                     Log.d(TAG, "Total spots available from Home Screen is " + freeSpots.get(0));
                 }
             });
-//            Log.d(TAG, "Total spots available from Home Screen is " + freeSpots.get(0));
 
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
-                // Name, email address, and profile photo Url
+                // Name and email address
                 name = user.getDisplayName();
                 email = user.getEmail();
 
@@ -660,14 +617,9 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                                 default:
                                     freeSpots.set(0, totalFreeSpots);
                                     numSpots = totalFreeSpots;
-//                                    availSpots = (TextView) findViewById(R.id.available_spots);
-//                                    availSpots.setText(numSpots + "\n");
                             }
 
                             callback.onSuccess(area_id, totalFreeSpots);
-
-//                            availSpots = (TextView) findViewById(R.id.available_spots);
-//                            availSpots.setText(numSpots + "\n");
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -682,13 +634,19 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                 });
         // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(HomeActivity.this).addToRequestQueue(jsonObjectRequest);
-
-//        return numSpots;
     }
 
     @Override
     public void onFinishFilterDialog(boolean[] inputArray) {
         filterLots = inputArray;
+
+        for(int i = 0; i < filterLots.length; i++){
+            if(!filterLots[i]){
+                markerList.get(i+1).setVisible(false);
+            } else {
+                markerList.get(i+1).setVisible(true);
+            }
+        }
     }
 
     @Override
@@ -724,26 +682,26 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.refresh:
-//                for (int i = 0; i < filterLots.length; i++) {
-//                    if (filterLots[i]) {
-//                        getSpotStatistics(idArray[i], new VolleyCallback() {
-//                            @Override
-//                            public void onSuccess(int areaId, String result) {
-//
-//                            }
-//                        });
-//                        System.out.println("freeSpot #" + i + ": " + freeSpots.get(i));
-//                    } else {
-//                        freeSpots.add(i, "0");
-//                    }
-//                }
+                for (int i = 0; i < filterLots.length; i++) {
+                    if (filterLots[i]) {
+                        getSpotStatistics(idArray[i], new VolleyCallback() {
+                            @Override
+                            public void onSuccess(String areaId, String result) {
+                                System.out.println("areaID " + areaId + ": " + result);
+
+                            }
+                        });
+                    }
+                }
+
                 getSpotStatistics(CAMPUS_ID, new VolleyCallback() {
                     @Override
                     public void onSuccess(String areaId, String result) {
-
+                        availSpots = (TextView) findViewById(R.id.available_spots);
+                        availSpots.setText(numSpots + "\n");
+                        Log.d(TAG, "Total spots available from Home Screen is " + freeSpots.get(0));
                     }
                 });
-//                Log.d(TAG, "Total spots available is " + freeSpots.get(0));
 
                 return true;
             case R.id.claim_spot:
@@ -778,6 +736,7 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
             case R.id.filter:
                 DialogFragment dialog = new FilterDialog();
                 dialog.show(getSupportFragmentManager(), "FilterDialog");
+
                 return true;
             case R.id.profile:
                 Intent profileIntent = new Intent(this, ProfileActivity.class);

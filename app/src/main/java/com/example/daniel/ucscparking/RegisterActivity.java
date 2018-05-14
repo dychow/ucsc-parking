@@ -148,36 +148,6 @@ public class RegisterActivity extends AppCompatActivity {
                 while((inputLine = in.readLine()) != null)
                     System.out.println(inputLine);
                 in.close();
-
-//                JSONObject jsonObj = new JSONObject();
-//                jsonObj.put("first name", params[0].acc_firstName);
-//                jsonObj.put("last name", params[0].acc_lastName);
-//                jsonObj.put("user email", params[0].acc_loginId);
-//                jsonObj.put("user pwd", params[0].acc_password);
-//
-//                System.out.println("Making JSON Object request");
-//
-//                JsonObjectRequest jsObjRequest = new JsonObjectRequest
-//                        (Request.Method.POST, createUserUrl, jsonObj, new Response.Listener<JSONObject>() {
-//
-//                            @Override
-//                            public void onResponse(JSONObject response) {
-//                                System.out.print("Receiving response from link: ");
-//                                System.out.println(response);
-//                            }
-//                        }, new Response.ErrorListener() {
-//
-//                            @Override
-//                            public void onErrorResponse(VolleyError error) {
-//                                // TODO Auto-generated method stub
-//
-//                            }
-//                        });
-//                // Access the RequestQueue through your singleton class.
-//                MySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsObjRequest);
-
-
-//                new SendDeviceDetails.execute("http://52.88.194.67:8080/IOTProjectServer/registerDevice", postData.toString());
             }catch(Exception e){
                 e.printStackTrace();
             }
@@ -201,23 +171,11 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         setupActionBar();
+
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-
         mPasswordView = (EditText) findViewById(R.id.password);
-//        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-//                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-//                    attemptLogin();
-//                    return true;
-//                }
-//                return false;
-//            }
-//        });
-
         mFirstNameView = (EditText) findViewById(R.id.first_name);
-
         mLastNameView = (EditText) findViewById(R.id.last_name);
 
 
@@ -225,7 +183,6 @@ public class RegisterActivity extends AppCompatActivity {
         mEmailRegisterButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-//                attemptLogin();
                 createAccount(mEmailView.getText().toString(), mPasswordView.getText().toString());
             }
         });
@@ -245,7 +202,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         showProgressDialog();
 
-        // [START create_user_with_email]
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -268,6 +224,8 @@ public class RegisterActivity extends AppCompatActivity {
                             CreateAccount newAccount = new CreateAccount();
                             newAccount.execute(params);
 
+                            // TODO email verification
+
                             updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -277,12 +235,9 @@ public class RegisterActivity extends AppCompatActivity {
                             updateUI(null);
                         }
 
-                        // [START_EXCLUDE]
                         hideProgressDialog();
-                        // [END_EXCLUDE]
                     }
                 });
-        // [END create_user_with_email]
     }
 
     private void updateUI(FirebaseUser user) {
@@ -296,15 +251,6 @@ public class RegisterActivity extends AppCompatActivity {
             System.out.println("user email is: " + user.getEmail());
             System.out.println("user verified status is: " + user.isEmailVerified());
 
-//            mStatusView.setText(getString(R.string.emailpassword_status_fmt,
-//                    user.getEmail(), user.isEmailVerified()));
-//            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
-//
-//            findViewById(R.id.email_password_buttons).setVisibility(View.GONE);
-//            findViewById(R.id.email_password_fields).setVisibility(View.GONE);
-//            findViewById(R.id.signed_in_buttons).setVisibility(View.VISIBLE);
-//
-//            findViewById(R.id.verify_email_button).setEnabled(!user.isEmailVerified());
         } else {
 
         }

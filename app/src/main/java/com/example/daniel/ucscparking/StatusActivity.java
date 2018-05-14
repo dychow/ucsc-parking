@@ -19,7 +19,6 @@ import com.google.firebase.database.DatabaseReference;
 
 public class StatusActivity extends AppCompatActivity {
 
-    //    private UserLoginTask mAuthTask = null;
     private static final String TAG = "StatusActivity";
 
 
@@ -29,7 +28,7 @@ public class StatusActivity extends AppCompatActivity {
     private TextView mTimeView;
     private TextView mValidityView;
 
-//    private Button mVerifyParking;
+    private Button mVerifyParking;
 
     private FirebaseAuth mAuth;
 
@@ -104,12 +103,12 @@ public class StatusActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_status);
 
-        mStatusView = (TextView) findViewById(R.id.current_status);;
-        mSpotView = (TextView) findViewById(R.id.parked_spot);;
-        mTimeView = (TextView) findViewById(R.id.time_left);;
-        mValidityView = (TextView) findViewById(R.id.validity);;
+        mStatusView = (TextView) findViewById(R.id.current_status);
+        mSpotView = (TextView) findViewById(R.id.parked_spot);
+        mTimeView = (TextView) findViewById(R.id.time_left);
+        mValidityView = (TextView) findViewById(R.id.validity);
 
-//        mVerifyParking = (Button) findViewById(R.id.scan_spots);
+        mVerifyParking = (Button) findViewById(R.id.scan_spots);
 
         mStatusView.setText(R.string.not_parked_status);
         mTimeView.setText(R.string.time_remaining);
@@ -119,12 +118,12 @@ public class StatusActivity extends AppCompatActivity {
         mTimeView.setVisibility(View.GONE);
         mValidityView.setVisibility(View.GONE);
 
-//        mVerifyParking.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                scanSpots();
-//            }
-//        });
+        mVerifyParking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                scanSpots();
+            }
+        });
 
     }
 

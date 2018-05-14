@@ -1,6 +1,8 @@
 package com.example.daniel.ucscparking;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
@@ -17,6 +19,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A fragment representing a list of Items.
@@ -24,15 +28,50 @@ import java.util.ArrayList;
  * Activities containing this fragment MUST implement the {OnListFragmentInteractionListener}
  * interface.
  */
-public class ParkingListFragment extends ListFragment implements OnItemClickListener {
+public class ParkingListFragment extends ListFragment implements OnItemClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private ArrayList<String> spotArray;
+    ArrayAdapter adapter;
+
+    List<String> lots = Arrays.asList(
+            "East Remote",
+            "West Remote",
+            "West Core",
+            "Cowell",
+            "Stevenson",
+            "Crown",
+            "Merill",
+            "Kresge",
+            "Porter",
+            "Oakes",
+            "Rachel Carson",
+            "College 9",
+            "College 10",
+            "Jack Baskin Engineering");
+
+    boolean[] filterLots = {
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+    };
 
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
+
         return view;
     }
 
@@ -40,29 +79,49 @@ public class ParkingListFragment extends ListFragment implements OnItemClickList
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        spotArray = new ArrayList<String>();
-        spotArray.add("East Remote");
-        spotArray.add("West Remote");
-        spotArray.add("West Core");
-        spotArray.add("Cowell");
-        spotArray.add("Stevenson");
-        spotArray.add("Crown");
-        spotArray.add("Merill");
-        spotArray.add("Kresge");
-        spotArray.add("Porter");
-        spotArray.add("Oakes");
-        spotArray.add("Rachel Carson");
-        spotArray.add("College 9");
-        spotArray.add("College 10");
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        sharedPref.registerOnSharedPreferenceChangeListener(this);
 
-        ArrayAdapter adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, spotArray);
+        for(int i = 0; i<lots.size(); i++){
+            filterLots[i] = sharedPref.getBoolean(lots.get(i), true);
+        }
+
+        spotArray = new ArrayList<String>();
+        adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, spotArray);
         setListAdapter(adapter);
+
+        for(int i = 0; i < filterLots.length; i++){
+            if(filterLots[i] && !spotArray.contains(lots.get(i))){
+                spotArray.add(lots.get(i));
+            } else if(!filterLots[i] && spotArray.contains(lots.get(i))) {
+                spotArray.remove(lots.get(i));
+            }
+        }
+
         getListView().setOnItemClickListener(this);
+    }
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
+    {
+        for(int i = 0; i<lots.size(); i++){
+            filterLots[i] = sharedPreferences.getBoolean(lots.get(i), true);
+            if(filterLots[i] && !spotArray.contains(lots.get(i))){
+                spotArray.add(lots.get(i));
+            } else if(!filterLots[i] && spotArray.contains(lots.get(i))) {
+                spotArray.remove(lots.get(i));
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Toast.makeText(getActivity(), "Item: " + spotArray.get(position), Toast.LENGTH_SHORT).show();
+
+        Intent detailedListIntent = new Intent(getActivity(), DetailedListActivity.class);
+        detailedListIntent.putExtra("area", spotArray.get(position));
+        startActivity(detailedListIntent);
+
 
     }
 

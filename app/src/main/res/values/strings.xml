@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">UCSCParking</string>
     <string name="title_activity_maps">Map</string>
-    <string name="available_spots">Available Spots</string>
+    <string name="available_spots"> </string>
 
     <string name="title_home">Home</string>
     <string name="title_map">Map</string>
@@ -15,6 +15,7 @@
     <string name="title_activity_login">Sign in</string>
     <string name="title_status">Current Status</string>
     <string name="title_free_spots">Free Spots</string>
+    <string name="title_specific_lot">Parking Lot</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
