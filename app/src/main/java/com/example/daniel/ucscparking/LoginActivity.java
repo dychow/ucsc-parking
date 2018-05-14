@@ -171,6 +171,9 @@ public class LoginActivity extends AppCompatActivity{
             System.out.println("user email is: " + user.getEmail());
             System.out.println("user verified status is: " + user.isEmailVerified());
             
+        } else {
+            Toast.makeText(LoginActivity.this, "Email has not yet been verified.",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -256,12 +259,11 @@ public class LoginActivity extends AppCompatActivity{
             cancel = true;
         }
 
-        // Check if the user is verified
-        if(!mAuth.getCurrentUser().isEmailVerified()){
-            Toast.makeText(LoginActivity.this, "Email has not yet been verified.",
-                    Toast.LENGTH_SHORT).show();
-            cancel = true;
-        }
+//        // Check if the user is verified
+//        if(!mAuth.getCurrentUser().isEmailVerified()){
+//            Toast.makeText(LoginActivity.this, "Email has not yet been verified.",
+//                    Toast.LENGTH_SHORT).show();
+//        }
 
         if (cancel) {
             // There was an error; don't attempt login and focus on the first

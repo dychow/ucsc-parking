@@ -172,6 +172,10 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
     // Define the asynchronous task to help users claim a parking spot
     private class ClaimSpot extends AsyncTask<claimParams, Void, Void> {
 
+        String inputLine;
+        String parking_status;
+        String parking_spot;
+
         @Override
         protected Void doInBackground(claimParams... params) {
 
@@ -194,8 +198,6 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                         )
                 );
 
-                String inputLine;
-
                 // Check to see what the response was
                 // Change the Shared Preferences file depending on the legality of the parking
                 while ((inputLine = in.readLine()) != null) {
@@ -205,16 +207,22 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
                         editor.putString("parking status", "illegal");
                         editor.putString("spot", params[0].claim_spotId);
                         editor.apply();
+                        parking_status = "illegal";
+                        parking_spot = params[0].claim_spotId;
                     } else if (inputLine.contains("legal")) {
                         SharedPreferences.Editor editor = sharedPref.edit();
                         editor.putString("parking status", "legal");
                         editor.putString("spot", params[0].claim_spotId);
                         editor.apply();
+                        parking_status = "legal";
+                        parking_spot = params[0].claim_spotId;
                     } else {
                         SharedPreferences.Editor editor = sharedPref.edit();
                         editor.putString("parking status", "");
                         editor.putString("spot", "");
                         editor.apply();
+                        parking_status = "";
+                        parking_spot = "";
                     }
                 }
                 in.close();
@@ -229,6 +237,10 @@ public class HomeActivity extends AppCompatActivity implements BeaconConsumer, R
         @Override
         protected void onPostExecute(Void res) {
             System.out.println("Inside onPostExecute");
+
+            Intent statusIntent = new Intent(HomeActivity.this, StatusActivity.class);
+
+            startActivity(statusIntent);
         }
     }
 

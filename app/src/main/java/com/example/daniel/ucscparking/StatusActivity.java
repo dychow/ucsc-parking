@@ -48,16 +48,57 @@ public class StatusActivity extends AppCompatActivity {
         mVerifyParking = (Button) findViewById(R.id.verify_spot);
         mCancelParking = (Button) findViewById(R.id.cancel_spot);
 
-        // Set default text
-        mStatusView.setText(R.string.not_parked_status);
-        mTimeView.setText(R.string.time_remaining);
-        mValidityView.setText(R.string.invalid_parking);
-
-        // Hide the views that will display when user is parked
-        mSpotView.setVisibility(View.GONE);
+        // Hide the Time view
         mTimeView.setVisibility(View.GONE);
-        mValidityView.setVisibility(View.GONE);
-        mCancelParking.setVisibility(View.GONE);
+
+        // Get the current parking status of the user and display it
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        String validity = sharedPref.getString("parking status", "");
+        if(validity == "legal"){
+            mStatusView.setText("You are currently parked in spot: ");
+
+            mSpotView.setText(sharedPref.getString("spot", ""));
+            mSpotView.setVisibility(View.VISIBLE);
+
+            mValidityView.setText("Valid");
+            mValidityView.setVisibility(View.VISIBLE);
+
+            mCancelParking.setVisibility(View.VISIBLE);
+            mVerifyParking.setVisibility(View.GONE);
+        } else if (validity == "illegal") {
+            mStatusView.setText("You are currently parked in spot: ");
+
+            mSpotView.setText(sharedPref.getString("spot", ""));
+            mSpotView.setVisibility(View.VISIBLE);
+
+            mValidityView.setText("Invalid");
+            mValidityView.setVisibility(View.VISIBLE);
+
+            mCancelParking.setVisibility(View.VISIBLE);
+            mVerifyParking.setVisibility(View.GONE);
+        } else {
+            mStatusView.setText("You are currently not parked");
+
+            mSpotView.setText("");
+            mSpotView.setVisibility(View.GONE);
+
+            mValidityView.setText("Invalid");
+            mValidityView.setVisibility(View.GONE);
+
+            mCancelParking.setVisibility(View.GONE);
+            mVerifyParking.setVisibility(View.VISIBLE);
+
+        }
+
+//        // Set default text
+//        mStatusView.setText(R.string.not_parked_status);
+//        mTimeView.setText(R.string.time_remaining);
+//        mValidityView.setText(R.string.invalid_parking);
+//
+//        // Hide the views that will display when user is parked
+//        mSpotView.setVisibility(View.GONE);
+//        mValidityView.setVisibility(View.GONE);
+//        mCancelParking.setVisibility(View.GONE);
 
         mVerifyParking.setOnClickListener(new View.OnClickListener() {
             @Override
