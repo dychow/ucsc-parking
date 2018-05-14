@@ -90,16 +90,6 @@ public class StatusActivity extends AppCompatActivity {
 
         }
 
-//        // Set default text
-//        mStatusView.setText(R.string.not_parked_status);
-//        mTimeView.setText(R.string.time_remaining);
-//        mValidityView.setText(R.string.invalid_parking);
-//
-//        // Hide the views that will display when user is parked
-//        mSpotView.setVisibility(View.GONE);
-//        mValidityView.setVisibility(View.GONE);
-//        mCancelParking.setVisibility(View.GONE);
-
         mVerifyParking.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
