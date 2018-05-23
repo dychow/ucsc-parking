@@ -88,7 +88,6 @@ public class LoginActivity extends AppCompatActivity{
 
         // See if the user is already logged in
         // If user is logged in and verified, take them to the home screen
-//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(!sharedPref.getString("user email", "").equals("")){
             firstName = sharedPref.getString("first name", "");
             lastName = sharedPref.getString("last name", "");
@@ -224,9 +223,7 @@ public class LoginActivity extends AppCompatActivity{
                 String final_str = loginUserUrl + "user+email=" + params[0].acc_loginId + "&";
                 final_str = final_str + "user+pwd=" + params[0].acc_password;
 
-
                 String jsonText;
-
                 String inputLine;
                 StringBuilder sb = new StringBuilder();
 
