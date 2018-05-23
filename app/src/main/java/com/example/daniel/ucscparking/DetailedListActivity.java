@@ -98,8 +98,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -112,8 +112,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -126,8 +126,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -140,8 +140,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -154,8 +154,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -167,8 +167,8 @@ public class DetailedListActivity extends AppCompatActivity {
                             mSpotView = (TextView) findViewById(R.id.lot_spots);
                             mListView = (TextView) findViewById(R.id.parking_spots);
 
-                            mSpotView.setText("Free Spots: " + result + "\n");
-                            mListView.setText("Spot List: \n" + freeList);
+                            mSpotView.setText(getString(R.string.free_spots, result));
+                            mListView.setText(getString(R.string.spot_list, freeList));
                             Log.d(TAG, "Total spots available from Home Screen is " + result);
                         }
                     });
@@ -181,8 +181,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -195,8 +195,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -209,8 +209,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -223,8 +223,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -237,8 +237,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -251,8 +251,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -265,8 +265,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -279,8 +279,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText("Free Spots: " + result + "\n");
-                        mListView.setText("Spot List: \n" + freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });
@@ -293,8 +293,8 @@ public class DetailedListActivity extends AppCompatActivity {
                         mSpotView = (TextView) findViewById(R.id.lot_spots);
                         mListView = (TextView) findViewById(R.id.parking_spots);
 
-                        mSpotView.setText(result + "\n");
-                        mListView.setText(freeList);
+                        mSpotView.setText(getString(R.string.free_spots, result));
+                        mListView.setText(getString(R.string.spot_list, freeList));
                         Log.d(TAG, "Total spots available from Home Screen is " + result);
                     }
                 });

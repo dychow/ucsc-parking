@@ -3,7 +3,10 @@ package com.example.daniel.ucscparking;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -25,6 +28,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -35,9 +39,16 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+//import com.google.firebase.auth.FirebaseAuth;
+//import com.google.firebase.auth.FirebaseUser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,8 +59,6 @@ import static android.Manifest.permission.READ_CONTACTS;
  */
 public class LoginActivity extends AppCompatActivity{
 
-    private FirebaseAuth mAuth;
-
     private static final String TAG = "LoginActivity";
 
     // UI references.
@@ -58,8 +67,14 @@ public class LoginActivity extends AppCompatActivity{
     private View mProgressView;
     private View mLoginFormView;
 
-    String name;
+    String firstName;
+    String lastName;
+    String permit;
+    String userKey;
     String email;
+
+    SharedPreferences sharedPref;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,35 +82,57 @@ public class LoginActivity extends AppCompatActivity{
         setContentView(R.layout.activity_login);
         getSupportActionBar().setTitle(R.string.title_activity_login);
 
-        mAuth = FirebaseAuth.getInstance();
+//        mAuth = FirebaseAuth.getInstance();
+        sharedPref = getApplicationContext().getSharedPreferences("Preferences", Context.MODE_PRIVATE);
+
 
         // See if the user is already logged in
         // If user is logged in and verified, take them to the home screen
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null && user.isEmailVerified()) {
-//        if (user != null) {
-        // Name and email address
-            name = user.getDisplayName();
-            email = user.getEmail();
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(!sharedPref.getString("user email", "").equals("")){
+            firstName = sharedPref.getString("first name", "");
+            lastName = sharedPref.getString("last name", "");
+            permit = sharedPref.getString("permit", "");
+            userKey = sharedPref.getString("user key", "");
+            email = sharedPref.getString("user email", "");
 
-            // Check if user's email is verified
-            boolean emailVerified = user.isEmailVerified();
-
-            // The user's ID, unique to the Firebase project. Do NOT use this value to
-            // authenticate with your backend server, if you have one. Use
-            // FirebaseUser.getToken() instead.
-            String uid = user.getUid();
+            String name = firstName + " " + lastName;
 
             System.out.println(name);
+            System.out.println(permit);
             System.out.println(email);
-            System.out.println(emailVerified);
-            System.out.println(uid);
+            System.out.println(userKey);
 
-            Intent loggedIntent = new Intent(this, HomeActivity.class);
-            loggedIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(loggedIntent);
+            Intent logInIntent = new Intent(LoginActivity.this, HomeActivity.class);
+            logInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(logInIntent);
             finish();
         }
+
+//        if (user != null && user.isEmailVerified()) {
+////        if (user != null) {
+//        // Name and email address
+//            name = user.getDisplayName();
+//            email = user.getEmail();
+//
+//            // Check if user's email is verified
+//            boolean emailVerified = user.isEmailVerified();
+//
+//            // The user's ID, unique to the Firebase project. Do NOT use this value to
+//            // authenticate with your backend server, if you have one. Use
+//            // FirebaseUser.getToken() instead.
+//            String uid = user.getUid();
+//
+//            System.out.println(name);
+//            System.out.println(email);
+//            System.out.println(emailVerified);
+//            System.out.println(uid);
+//
+//            Intent loggedIntent = new Intent(this, HomeActivity.class);
+//            loggedIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//            startActivity(loggedIntent);
+//            finish();
+//        }
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -106,6 +143,11 @@ public class LoginActivity extends AppCompatActivity{
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                InputMethodManager imm = (InputMethodManager) LoginActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                if (view == null) {
+                    view = new View(LoginActivity.this);
+                }
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 signIn(mEmailView.getText().toString(), mPasswordView.getText().toString());
             }
         });
@@ -132,90 +174,172 @@ public class LoginActivity extends AppCompatActivity{
             return;
         }
 
-        showProgressDialog();
+        //        showProgressDialog();
 
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-//                            updateUI(null);
-                        }
+        loginParams params = new loginParams(email, password);
+        LogInTask logIn = new LogInTask();
+        logIn.execute(params);
 
-//                        if (!task.isSuccessful()) {
-//                        }
-                        hideProgressDialog();
-                    }
-                });
     }
 
-    // Sends the user to the home screen if they have logged in and are verified
-    private void updateUI(FirebaseUser user) {
-        hideProgressDialog();
-        if (user != null  && user.isEmailVerified()) {
-//        if (user != null) {
-            Intent logInIntent = new Intent(this, HomeActivity.class);
-            logInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(logInIntent);
-            finish();
+//    // Sends the user to the home screen if they have logged in and are verified
+//    private void updateUI(FirebaseUser user) {
+////        hideProgressDialog();
+//        if (user != null  && user.isEmailVerified()) {
+////        if (user != null) {
+//            Intent logInIntent = new Intent(this, HomeActivity.class);
+//            logInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//            startActivity(logInIntent);
+//            finish();
+//
+//            System.out.println("user email is: " + user.getEmail());
+//            System.out.println("user verified status is: " + user.isEmailVerified());
+//
+//        } else {
+//            Toast.makeText(LoginActivity.this, "Email has not yet been verified.",
+//                    Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
-            System.out.println("user email is: " + user.getEmail());
-            System.out.println("user verified status is: " + user.isEmailVerified());
-            
-        } else {
-            Toast.makeText(LoginActivity.this, "Email has not yet been verified.",
-                    Toast.LENGTH_SHORT).show();
+    private static class loginParams {
+        String acc_loginId;
+        String acc_password;
+
+        loginParams(String loginId, String password) {
+            this.acc_loginId = loginId;
+            this.acc_password = password;
         }
     }
 
-    private void showProgressDialog() {
-        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+    // Define the asynchronous task to help users login to their account on the datastore
+    private class LogInTask extends AsyncTask<loginParams, Void, Void>{
+        JSONObject loginJson;
 
-        mLoginFormView.setVisibility(View.VISIBLE);
-        mLoginFormView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mLoginFormView.setVisibility(View.VISIBLE);
-            }
-        });
+        @Override
+        protected Void doInBackground(loginParams... params) {
 
-        mProgressView.setVisibility(View.GONE);
-        mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mProgressView.setVisibility(View.GONE);
+            // Set the URL that will be used to connect to the cloud
+            String loginUserUrl = "https://cmpe-123a-18-g11.appspot.com/login?";
+            try {
+                String final_str = loginUserUrl + "user+email=" + params[0].acc_loginId + "&";
+                final_str = final_str + "user+pwd=" + params[0].acc_password;
+
+
+                String jsonText;
+
+                String inputLine;
+                StringBuilder sb = new StringBuilder();
+
+                // Create a link to the URL and get a response
+                URL link = new URL(final_str);
+                URLConnection con = link.openConnection();
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(
+                                con.getInputStream()
+                        )
+                );
+
+                while ((inputLine = in.readLine()) != null) {
+                    System.out.println(inputLine);
+                    sb.append(inputLine);
+                }
+                in.close();
+                jsonText = sb.toString();
+                loginJson = new JSONObject(jsonText);
+
+            }catch(Exception e){
+                e.printStackTrace();
             }
-        });
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void res) {
+            System.out.println("Inside onPostExecute");
+            try {
+                if (loginJson.getString("status").equals("failure")) {
+                    String errorMessage = loginJson.getString("message");
+                    if (errorMessage.equals("user not exist")){
+                        Toast.makeText(LoginActivity.this, "User does not exist.",
+                                Toast.LENGTH_SHORT).show();
+                    } else if (errorMessage.equals("email pwd not match")) {
+                        Toast.makeText(LoginActivity.this, "Login Credentials are incorrect.",
+                                Toast.LENGTH_SHORT).show();
+                    } else if (errorMessage.equals("user not verified")){
+                        Toast.makeText(LoginActivity.this, "User is not verified.",
+                                Toast.LENGTH_SHORT).show();
+                    } else{
+                        Toast.makeText(LoginActivity.this, "Authentication failed. Please try again.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    String firstName = loginJson.getString("first name");
+                    String lastName = loginJson.getString("last name");
+                    String permit = loginJson.getString("permit");
+                    String userKey = loginJson.getString("user key");
+                    String email = mEmailView.getText().toString();
+
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString("user email", email);
+                    editor.putString("first name", firstName);
+                    editor.putString("last name", lastName);
+                    editor.putString("permit", permit);
+                    editor.putString("user key", userKey);
+                    editor.apply();
+
+                    Toast.makeText(LoginActivity.this, "Successfully signed in.",
+                            Toast.LENGTH_SHORT).show();
+
+                    Intent logInIntent = new Intent(LoginActivity.this, HomeActivity.class);
+                    logInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(logInIntent);
+                    finish();
+                }
+            } catch(JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    private void hideProgressDialog() {
-        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-        mLoginFormView.setVisibility(View.VISIBLE);
-        mLoginFormView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mLoginFormView.setVisibility(View.VISIBLE);
-            }
-        });
-
-        mProgressView.setVisibility(View.GONE);
-        mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mProgressView.setVisibility(View.GONE);
-            }
-        });
-    }
+//    private void showProgressDialog() {
+//        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+//
+//        mLoginFormView.setVisibility(View.VISIBLE);
+//        mLoginFormView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                mLoginFormView.setVisibility(View.VISIBLE);
+//            }
+//        });
+//
+//        mProgressView.setVisibility(View.GONE);
+//        mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                mProgressView.setVisibility(View.GONE);
+//            }
+//        });
+//    }
+//
+//    private void hideProgressDialog() {
+//        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+//
+//        mLoginFormView.setVisibility(View.VISIBLE);
+//        mLoginFormView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                mLoginFormView.setVisibility(View.VISIBLE);
+//            }
+//        });
+//
+//        mProgressView.setVisibility(View.GONE);
+//        mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                mProgressView.setVisibility(View.GONE);
+//            }
+//        });
+//    }
 
 
 
@@ -259,12 +383,6 @@ public class LoginActivity extends AppCompatActivity{
             cancel = true;
         }
 
-//        // Check if the user is verified
-//        if(!mAuth.getCurrentUser().isEmailVerified()){
-//            Toast.makeText(LoginActivity.this, "Email has not yet been verified.",
-//                    Toast.LENGTH_SHORT).show();
-//        }
-
         if (cancel) {
             // There was an error; don't attempt login and focus on the first
             // form field with an error.
@@ -285,4 +403,3 @@ public class LoginActivity extends AppCompatActivity{
         return password.length() >= 6;
     }
 }
-

@@ -80,7 +80,7 @@ public class ParkingListFragment extends ListFragment implements OnItemClickList
         super.onActivityCreated(savedInstanceState);
 
         // Filter the parking areas depending on what is in the Shared Preferences file
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getActivity().getSharedPreferences("Preferences", Context.MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
 
         for(int i = 0; i<lots.size(); i++){
@@ -120,13 +120,9 @@ public class ParkingListFragment extends ListFragment implements OnItemClickList
     // Takes user to the more detailed view of the parking area
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Toast.makeText(getActivity(), "Item: " + spotArray.get(position), Toast.LENGTH_SHORT).show();
-
         Intent detailedListIntent = new Intent(getActivity(), DetailedListActivity.class);
         detailedListIntent.putExtra("area", spotArray.get(position));
         startActivity(detailedListIntent);
-
-
     }
 
 }

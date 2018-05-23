@@ -1,40 +1,21 @@
 package com.example.daniel.ucscparking;
 
-import android.accounts.AccountManager;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
 
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -51,7 +32,8 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+//import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -83,17 +65,16 @@ public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
 
-
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
+    private EditText mConfirmPasswordView;
     private EditText mFirstNameView;
     private EditText mLastNameView;
     private View mProgressView;
     private View mLoginFormView;
 
-    private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
+//    private FirebaseAuth mAuth;
 
     private String firstName;
     private String lastName;
@@ -115,15 +96,16 @@ public class RegisterActivity extends AppCompatActivity {
 
     // Define the asynchronous task to help users register an account on the datastore
     private class CreateAccount extends AsyncTask<accountParams, Void, Void>{
+        JSONObject loginJson;
+
 
         @Override
         protected Void doInBackground(accountParams... params) {
 
             // Set the URL that will be used to connect to the cloud
-            String createUserUrl = "https://cmpe-123a-18-g11.appspot.com/new-user?";
+            String createUserUrl = "https://cmpe-123a-18-g11.appspot.com/register?";
             try {
-                String final_str = createUserUrl + "message+type=user+register&";
-                final_str = final_str + "first+name=" + params[0].acc_firstName + "&";
+                String final_str = createUserUrl + "first+name=" + params[0].acc_firstName + "&";
                 final_str = final_str + "last+name=" + params[0].acc_lastName + "&";
                 final_str = final_str + "user+email=" + params[0].acc_loginId + "&";
                 final_str = final_str + "user+pwd=" + params[0].acc_password;
@@ -137,26 +119,51 @@ public class RegisterActivity extends AppCompatActivity {
                         )
                 );
 
-                String inputLine;
+                String jsonText;
 
-                while((inputLine = in.readLine()) != null)
+                String inputLine;
+                StringBuilder sb = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
                     System.out.println(inputLine);
+                    sb.append(inputLine);
+                }
                 in.close();
+                jsonText = sb.toString();
+                loginJson = new JSONObject(jsonText);
             }catch(Exception e){
                 e.printStackTrace();
             }
-
             return null;
         }
 
         @Override
         protected void onPostExecute(Void res) {
-
             System.out.println("Inside onPostExecute");
+            try {
+                if (loginJson.getString("status").equals("failure")) {
+                    String errorMessage = loginJson.getString("message");
+                    if (errorMessage.equals("email already used")){
+                        Toast.makeText(RegisterActivity.this, "User already exists.",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(RegisterActivity.this, "Account Creation failed. Please try again.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(RegisterActivity.this,
+                            "Must verify email",
+                            Toast.LENGTH_SHORT).show();
 
+                    Intent logInIntent = new Intent(RegisterActivity.this, LoginActivity.class);
+                    logInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(logInIntent);
+                    finish();
+                }
+            } catch(JSONException e) {
+                e.printStackTrace();
+            }
         }
-
-
     }
 
 
@@ -169,6 +176,7 @@ public class RegisterActivity extends AppCompatActivity {
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mPasswordView = (EditText) findViewById(R.id.password);
+        mConfirmPasswordView = (EditText) findViewById(R.id.password_confirm);
         mFirstNameView = (EditText) findViewById(R.id.first_name);
         mLastNameView = (EditText) findViewById(R.id.last_name);
 
@@ -184,7 +192,7 @@ public class RegisterActivity extends AppCompatActivity {
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        mAuth = FirebaseAuth.getInstance();
+//        mAuth = FirebaseAuth.getInstance();
 
     }
 
@@ -192,129 +200,55 @@ public class RegisterActivity extends AppCompatActivity {
         Log.d(TAG, "createAccount:" + email);
         if (!validateForm()) {
             return;
-        }
-
-        showProgressDialog();
-
-        // Create the user with email and password on Firebase
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "createUserWithEmail:success");
-                            final FirebaseUser user = mAuth.getCurrentUser();
-                            String name = firstName + " " + lastName;
-
-                            // Update the user's name
-                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(name).build();
-
-                            user.updateProfile(profileUpdates);
-
-                            mDatabase = FirebaseDatabase.getInstance().getReference();
-                            mDatabase.child("users").child(user.getUid()).child("email").setValue(user.getEmail());
-
-                            accountParams params = new accountParams(firstName, lastName, user.getEmail(), password);
-                            CreateAccount newAccount = new CreateAccount();
-                            newAccount.execute(params);
-
-                            // Send email to user for verification of identity
-                            user.sendEmailVerification()
-                                    .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener() {
-                                        @Override
-                                        public void onComplete(@NonNull Task task) {
-                                            if (task.isSuccessful()) {
-                                                Toast.makeText(RegisterActivity.this,
-                                                        "Verification email sent to " + user.getEmail(),
-                                                        Toast.LENGTH_SHORT).show();
-                                            } else {
-                                                Log.e(TAG, "sendEmailVerification", task.getException());
-                                                Toast.makeText(RegisterActivity.this,
-                                                        "Failed to send verification email.",
-                                                        Toast.LENGTH_SHORT).show();
-                                            }
-                                        }
-                                    });
-
-                            updateUI(user);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterActivity.this, "Account Creation Failed",
-                                    Toast.LENGTH_SHORT).show();
-                            updateUI(null);
-                        }
-
-                        hideProgressDialog();
-                    }
-                });
-    }
-
-    // Sends user to login screen so that they can verify their email
-    //  If their email is already verified, they will be taken to the home screen of the app
-    private void updateUI(FirebaseUser user) {
-        hideProgressDialog();
-        if (user != null && user.isEmailVerified()) {
-            Intent logInIntent = new Intent(this, HomeActivity.class);
-            logInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(logInIntent);
-            finish();
-
-            System.out.println("user email is: " + user.getEmail());
-            System.out.println("user verified status is: " + user.isEmailVerified());
-
         } else {
-            Toast.makeText(RegisterActivity.this,
-                    "Must verify email",
-                    Toast.LENGTH_SHORT).show();
-            Intent logInIntent = new Intent(this, LoginActivity.class);
-            logInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(logInIntent);
-            finish();
+
+//        showProgressDialog();
+
+            accountParams params = new accountParams(firstName, lastName, email, password);
+            CreateAccount newAccount = new CreateAccount();
+            newAccount.execute(params);
         }
     }
 
-    private void showProgressDialog() {
-        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-        mLoginFormView.setVisibility(View.VISIBLE);
-        mLoginFormView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mLoginFormView.setVisibility(View.VISIBLE);
-            }
-        });
-
-        mProgressView.setVisibility(View.GONE);
-        mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mProgressView.setVisibility(View.GONE);
-            }
-        });
-    }
-
-    private void hideProgressDialog() {
-        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-        mLoginFormView.setVisibility(View.VISIBLE);
-        mLoginFormView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mLoginFormView.setVisibility(View.VISIBLE);
-            }
-        });
-
-        mProgressView.setVisibility(View.GONE);
-        mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mProgressView.setVisibility(View.GONE);
-            }
-        });
-    }
+//    private void showProgressDialog() {
+//        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+//
+//        mLoginFormView.setVisibility(View.VISIBLE);
+//        mLoginFormView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                mLoginFormView.setVisibility(View.VISIBLE);
+//            }
+//        });
+//
+//        mProgressView.setVisibility(View.GONE);
+//        mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                mProgressView.setVisibility(View.GONE);
+//            }
+//        });
+//    }
+//
+//    private void hideProgressDialog() {
+//        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+//
+//        mLoginFormView.setVisibility(View.VISIBLE);
+//        mLoginFormView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                mLoginFormView.setVisibility(View.VISIBLE);
+//            }
+//        });
+//
+//        mProgressView.setVisibility(View.GONE);
+//        mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                mProgressView.setVisibility(View.GONE);
+//            }
+//        });
+//    }
 
     // Ensures that the parameters for the account creation are filled
     // Ensures that email and passwords fulfill conditions
@@ -330,8 +264,22 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         String password = mPasswordView.getText().toString();
-        if (TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (TextUtils.isEmpty(password)) {
             mPasswordView.setError("Required.");
+            valid = false;
+        } else if (!isPasswordValid(password)) {
+            mPasswordView.setError("Not a valid password.");
+            valid = false;
+        } else {
+            mPasswordView.setError(null);
+        }
+
+        String confirmPass = mConfirmPasswordView.getText().toString();
+        if (TextUtils.isEmpty(confirmPass)) {
+            mPasswordView.setError("Required.");
+            valid = false;
+        } else if(!confirmPass.equals(password)){
+            mConfirmPasswordView.setError("Passwords must match.");
             valid = false;
         } else {
             mPasswordView.setError(null);
@@ -378,4 +326,3 @@ public class RegisterActivity extends AppCompatActivity {
         return password.length() > 6;
     }
 }
-

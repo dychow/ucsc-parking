@@ -3,6 +3,7 @@
     <string name="title_activity_maps">Map</string>
     <string name="available_spots"> </string>
 
+    <!-- Strings related to titles of pages -->
     <string name="title_home">Home</string>
     <string name="title_map">Map</string>
     <string name="title_spots">Parking Spots</string>
@@ -20,6 +21,7 @@
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
     <string name="password_creation">Password</string>
     <string name="action_sign_in">Sign in</string>
     <string name="action_register">Register</string>
@@ -37,8 +39,11 @@
 
     <!-- Strings related to profile -->
     <string name="edit_profile">Edit Profile</string>
+    <string name="change_password">Change Password</string>
     <string name="save_changes">Save Changes</string>
     <string name="cancel_changes">Cancel Changes</string>
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
 
     <!-- Strings related to filtering -->
     <string name="dialog_title">Filters</string>
@@ -47,7 +52,7 @@
     <string name="dialog_cancel">Cancel</string>
 
     <!-- Strings related to current status -->
-    <string name="parked_status">You are currently parked in </string>
+    <string name="parked_status">You are currently parked in spot: </string>
     <string name="not_parked_status">You are currently not parked</string>
     <string name="time_remaining">Time Remaining: </string>
     <string name="valid_parking">Valid</string>
@@ -59,8 +64,11 @@
     <string name="nearby_spots">Nearby Spots</string>
     <string name="claim_spot">Claim Spot</string>
 
+    <!-- Strings related to parking list -->
+    <string name="free_spots">Free Spots: %1$s\n</string>
+    <string name="spot_list">Spot List: \n%1$s</string>
 
-    <!-- String related to parking list -->
+    <!-- Strings related to parking areas -->
     <string name="east_remote">East Remote</string>
     <string name="west_remote">West Remote</string>
     <string name="west_core">West Core</string>

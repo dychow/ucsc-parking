@@ -21,6 +21,8 @@ public class HomeFragment extends Fragment {
         try {
             View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+
+
             return view;
 
         } catch (Exception e) {

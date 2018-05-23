@@ -79,7 +79,7 @@ public class FilterDialog extends DialogFragment {
         mSelectedItems = new ArrayList();
 
         // Store the items to keep in a Shared Preferences file
-        sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        sharedPref = getActivity().getSharedPreferences("Preferences", Context.MODE_PRIVATE);
         for(int i = 0; i<lots.size(); i++){
             checkedItems[i] = sharedPref.getBoolean(lots.get(i), true);
         }
